@@ -35,9 +35,7 @@ resource aws_instance owncloud_test {
     encrypted             = true
   }
 
-  user_data = "sudo apt install apache2 && sudo apt install gpg && sudo apt install unzip" // sudo apt-get update && 
-
-  // another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
+  # another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
   connection {
     type        = "ssh"
     user        = "ubuntu"
@@ -45,15 +43,14 @@ resource aws_instance owncloud_test {
     host        = aws_instance.owncloud_test.public_ip
   }
 
-  // provisioner file {
-  //   destination = "/etc/apache2/sites-available/owncloud.conf"
-  //   source      = "./apache-owncloud.conf"
-  // }
+  # provisioner file {
+  #   destination = "/etc/apache2/sites-available/owncloud.conf"
+  #   source      = "./apache-owncloud.conf"
+  # }
 
-  // provisioner remote-exec {
-  //   inline = [
-  //   ]
-  // }
+  # provisioner local-exec {
+  #   command = "echo 'Waiting for user_data commands to complete...' && sleep 45"
+  # }
 
   tags = {
     Name = "owncloud-fromscratch-ubuntu1804-${random_pet.owncloud.id}"
@@ -68,12 +65,27 @@ resource null_resource install_owncloud {
     host        = aws_instance.owncloud_test.public_ip
   }
 
-  // provisioner local-exec {
-  //   command = "sleep 90"
-  // }
+  # provisioner remote-exec {
+  #   inline = [
+  #     "sudo apt-get update",
+  #     "sudo apt install apache2",
+  #     "sudo apt install gpg",
+  #     "sudo apt install unzip",
+  #   ]
+  # }
+
+  provisioner remote-exec {
+    inline = [
+      "sudo apt-get --assume-yes update",
+      "sudo apt-get --assume-yes install apache2 gpg unzip",
+      # "",
+      # "",
+      # "",
+    ]
+  }
 
   provisioner file {
-    destination = "/etc/apache2/sites-available/owncloud.conf"
+    destination = "/tmp/owncloud.conf"
     source      = "./apache-owncloud.conf"
   }
 
@@ -89,18 +101,16 @@ resource null_resource install_owncloud {
       "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
       "unzip owncloud-${local.owncloud_version}.zip",
       "sudo cp -r owncloud /var/www",
-      "ls -al /var/www/owncloud",
-      "a2enmod rewrite",
-      "a2enmod headers",
-      "a2enmod env",
-      "a2enmod dir",
-      "a2enmod mime",
-      "a2enmod unique_id",
-      "sudo service apache2 restart",
-      // "",
-      // "",
-      // "",
-      // "",
+      "sudo a2enmod rewrite",
+      "sudo a2enmod headers",
+      "sudo a2enmod env",
+      "sudo a2enmod dir",
+      "sudo a2enmod mime",
+      "sudo a2enmod unique_id",
+      "sudo systemctl restart apache2",
+      # "",
+      # "",
+      # "",
     ]
   }
 

@@ -2,12 +2,12 @@ locals {
   vpc_subnet_count_validated = min(var.vpc_subnet_count, length(data.aws_availability_zones.current.zone_ids))
   vpc_cidr_base_bits         = tonumber(split("/", var.vpc_cidr)[1])
 
-  // AWS only allows subnets to size /28, need space to split this in half for public/private
-  // https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html#VPC_Sizing
+  # AWS only allows subnets to size /28, need space to split this in half for public/private
+  # https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html#VPC_Sizing
   cidr_newbits_max_range = 27 - local.vpc_cidr_base_bits
   eligible_cidr_bits     = [for i in range(local.cidr_newbits_max_range) : i if pow(2, i) >= local.vpc_subnet_count_validated]
   cidr_newbits           = local.eligible_cidr_bits[0]
-  // all_vpc_subnets        = cidrsubnets(var.vpc_cidr, [for i in range(local.vpc_subnet_count_validated) : local.cidr_newbits])
+  # all_vpc_subnets        = cidrsubnets(var.vpc_cidr, [for i in range(local.vpc_subnet_count_validated) : local.cidr_newbits])
   all_vpc_subnets = [for i in range(local.vpc_subnet_count_validated) : cidrsubnet(var.vpc_cidr, local.cidr_newbits, i)]
 
   public_subnets  = [for cidr in local.all_vpc_subnets : cidrsubnet(cidr, 1, 0)]
@@ -16,17 +16,17 @@ locals {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  // // AWS services endpoints
-  // enable_s3_endpoint            = true
-  // enable_dynamodb_endpoint      = true
-  // enable_ssm_endpoint           = true
-  // enable_ssmmessages_endpoint   = true
-  // enable_ec2_endpoint           = true
-  // enable_ec2messages_endpoint   = true
-  // enable_kms_endpoint           = true
-  // enable_ecs_endpoint           = true
-  // enable_ecs_telemetry_endpoint = true
-  // enable_sqs_endpoint           = true
+  # # AWS services endpoints
+  # enable_s3_endpoint            = true
+  # enable_dynamodb_endpoint      = true
+  # enable_ssm_endpoint           = true
+  # enable_ssmmessages_endpoint   = true
+  # enable_ec2_endpoint           = true
+  # enable_ec2messages_endpoint   = true
+  # enable_kms_endpoint           = true
+  # enable_ecs_endpoint           = true
+  # enable_ecs_telemetry_endpoint = true
+  # enable_sqs_endpoint           = true
 }
 
 module vpc {

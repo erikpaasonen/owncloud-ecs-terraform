@@ -1,5 +1,5 @@
 data aws_ami ubuntu_18_04 {
-  owners      = ["099720109477"] // Canonical
+  owners      = ["099720109477"] # Canonical
   most_recent = true
 
   filter {
@@ -16,32 +16,32 @@ data aws_vpc_endpoint_service s3 {
   service = "s3"
 }
 
-// data aws_ami_ids all_ubuntu_amis {
-//   // owners = ["aws-marketplace"]
+# data aws_ami_ids all_ubuntu_amis {
+#   # owners = ["aws-marketplace"]
 
-//   filter {
-//     name   = "name"
-//     values = ["*buntu*"]
-//   }
+#   filter {
+#     name   = "name"
+#     values = ["*buntu*"]
+#   }
 
-//   filter {
-//     name   = "name"
-//     values = ["*18.04*"]
-//   }
+#   filter {
+#     name   = "name"
+#     values = ["*18.04*"]
+#   }
 
-//   filter {
-//     name   = "architecture"
-//     values = ["x86_64"]
-//   }
-// }
+#   filter {
+#     name   = "architecture"
+#     values = ["x86_64"]
+#   }
+# }
 
-// data aws_ami image_details {
-//   for_each = toset(data.aws_ami_ids.all_ubuntu_amis.ids)
+# data aws_ami image_details {
+#   for_each = toset(data.aws_ami_ids.all_ubuntu_amis.ids)
 
-//   owners = ["aws-marketplace"]
+#   owners = ["aws-marketplace"]
 
-//   filter {
-//     name   = "image-id"
-//     values = [each.value]
-//   }
-// }
+#   filter {
+#     name   = "image-id"
+#     values = [each.value]
+#   }
+# }

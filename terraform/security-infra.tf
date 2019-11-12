@@ -1,4 +1,4 @@
-// this is unfortunately a pet, not cattle, so let's have fun with that fact
+# this is unfortunately a pet, not cattle, so let's have fun with that fact
 resource random_pet owncloud {
   keepers = {
     deploy_version     = "v0.0.1"
