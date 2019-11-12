@@ -1,30 +1,32 @@
-data aws_availability_zones current {
-  state = "available"
-}
-
-data aws_ami owncloud_bitnami {
+data aws_ami ubuntu_18_04 {
+  owners      = ["099720109477"] // Canonical
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["bitnami-owncloud-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
-
-  owners = ["aws-marketplace"]
 }
 
-data "aws_vpc_endpoint_service" "s3" {
+data aws_availability_zones current {
+  state = "available"
+}
+
+data aws_vpc_endpoint_service s3 {
   service = "s3"
 }
 
-
-
-// data aws_ami_ids all_opencloud_amis {
-//   owners = ["aws-marketplace"]
+// data aws_ami_ids all_ubuntu_amis {
+//   // owners = ["aws-marketplace"]
 
 //   filter {
 //     name   = "name"
-//     values = ["*wn?loud*"]
+//     values = ["*buntu*"]
+//   }
+
+//   filter {
+//     name   = "name"
+//     values = ["*18.04*"]
 //   }
 
 //   filter {
@@ -34,7 +36,7 @@ data "aws_vpc_endpoint_service" "s3" {
 // }
 
 // data aws_ami image_details {
-//   for_each = toset(data.aws_ami_ids.all_opencloud_amis.ids)
+//   for_each = toset(data.aws_ami_ids.all_ubuntu_amis.ids)
 
 //   owners = ["aws-marketplace"]
 

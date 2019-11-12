@@ -8,3 +8,6 @@
 # .tfvars files
 *.tfvars
 *secrets.tf
+
+# plan file
+*tfplan

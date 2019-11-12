@@ -1,13 +1,6 @@
 locals {
-  mgmt_ip = "${var.mgmt_ip}/32"
-}
-
-// this is unfortunately a pet, not cattle, so let's have fun with that fact
-resource random_pet owncloud {
-  keepers = {
-    deploy_version     = "v0.0.1"
-    deploy_description = "updates"
-  }
+  mgmt_ip          = "${var.mgmt_ip}/32"
+  owncloud_version = "10.3.0"
 }
 
 resource random_shuffle owncloud_priv_subnet {
@@ -15,20 +8,18 @@ resource random_shuffle owncloud_priv_subnet {
   result_count = 1
 
   keepers = {
-    ami = random_pet.owncloud.keepers.deploy_version,
+    random_pet = random_pet.owncloud.id,
   }
 }
 
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = var.ssh_public_key_material
-}
-
 resource aws_instance owncloud_test {
-  ami           = data.aws_ami.owncloud_bitnami.image_id
+  ami           = data.aws_ami.ubuntu_18_04.image_id
   instance_type = "t3.micro"
-  subnet_id     = random_shuffle.owncloud_priv_subnet.result[0]
   key_name      = aws_key_pair.deployer.key_name
+
+  associate_public_ip_address = true
+
+  subnet_id = random_shuffle.owncloud_priv_subnet.result[0]
 
   vpc_security_group_ids = [
     aws_security_group.owncloud_admin.id,
@@ -44,9 +35,78 @@ resource aws_instance owncloud_test {
     encrypted             = true
   }
 
-  tags = {
-    Name = "owncloud-bitnami-${random_pet.owncloud.id}"
+  user_data = "sudo apt install apache2 && sudo apt install gpg && sudo apt install unzip" // sudo apt-get update && 
+
+  // another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = tls_private_key.owncloud.private_key_pem
+    host        = aws_instance.owncloud_test.public_ip
   }
+
+  // provisioner file {
+  //   destination = "/etc/apache2/sites-available/owncloud.conf"
+  //   source      = "./apache-owncloud.conf"
+  // }
+
+  // provisioner remote-exec {
+  //   inline = [
+  //   ]
+  // }
+
+  tags = {
+    Name = "owncloud-fromscratch-ubuntu1804-${random_pet.owncloud.id}"
+  }
+}
+
+resource null_resource install_owncloud {
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = tls_private_key.owncloud.private_key_pem
+    host        = aws_instance.owncloud_test.public_ip
+  }
+
+  // provisioner local-exec {
+  //   command = "sleep 90"
+  // }
+
+  provisioner file {
+    destination = "/etc/apache2/sites-available/owncloud.conf"
+    source      = "./apache-owncloud.conf"
+  }
+
+  provisioner remote-exec {
+    inline = [
+      "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
+      "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
+      "wget https://download.owncloud.org/owncloud.asc",
+      "gpg --import owncloud.asc",
+      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip",
+      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip.sha256",
+      "gpg --verify owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
+      "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
+      "unzip owncloud-${local.owncloud_version}.zip",
+      "sudo cp -r owncloud /var/www",
+      "ls -al /var/www/owncloud",
+      "a2enmod rewrite",
+      "a2enmod headers",
+      "a2enmod env",
+      "a2enmod dir",
+      "a2enmod mime",
+      "a2enmod unique_id",
+      "sudo service apache2 restart",
+      // "",
+      // "",
+      // "",
+      // "",
+    ]
+  }
+
+  depends_on = [
+    aws_instance.owncloud_test,
+  ]
 }
 
 resource aws_security_group owncloud_admin {
