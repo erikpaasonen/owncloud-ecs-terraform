@@ -43,15 +43,6 @@ resource aws_instance owncloud_test {
     host        = aws_instance.owncloud_test.public_ip
   }
 
-  # provisioner file {
-  #   destination = "/etc/apache2/sites-available/owncloud.conf"
-  #   source      = "./apache-owncloud.conf"
-  # }
-
-  # provisioner local-exec {
-  #   command = "echo 'Waiting for user_data commands to complete...' && sleep 45"
-  # }
-
   tags = {
     Name = "owncloud-fromscratch-ubuntu1804-${random_pet.owncloud.id}"
   }
@@ -64,15 +55,6 @@ resource null_resource install_owncloud {
     private_key = tls_private_key.owncloud.private_key_pem
     host        = aws_instance.owncloud_test.public_ip
   }
-
-  # provisioner remote-exec {
-  #   inline = [
-  #     "sudo apt-get update",
-  #     "sudo apt install apache2",
-  #     "sudo apt install gpg",
-  #     "sudo apt install unzip",
-  #   ]
-  # }
 
   provisioner remote-exec {
     inline = [
