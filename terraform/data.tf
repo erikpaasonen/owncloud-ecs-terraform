@@ -16,6 +16,10 @@ data aws_vpc_endpoint_service s3 {
   service = "s3"
 }
 
+data http my_public_ip {
+  url = "https://ifconfig.me/ip"
+}
+
 # data aws_ami_ids all_ubuntu_amis {
 #   # owners = ["aws-marketplace"]
 
