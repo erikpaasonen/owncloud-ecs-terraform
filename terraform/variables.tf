@@ -1,16 +1,19 @@
 variable mgmt_ip {
   type        = string
   description = "IP address from which the OwnCloud instance will be managed"
+  default     = ""
 }
 
 variable region {
   type        = string
   description = "Name of the AWS region where these resources should go"
+  default     = "us-east-1"
 }
 
 variable ssh_public_key_material {
   type        = string
-  description = "The public key of an SSH key pair to be used to admin the EC2 instance0"
+  description = "The public key of an SSH key pair to be used to admin the EC2 instance; if none provided, one will be generated and its private key stored in Parameter Store"
+  default     = ""
 }
 
 variable vpc_cidr {

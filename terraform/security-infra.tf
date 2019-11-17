@@ -16,7 +16,7 @@ resource tls_private_key owncloud {
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-${random_pet.owncloud.id}"
-  public_key = tls_private_key.owncloud.public_key_openssh
+  public_key = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud.public_key_openssh : var.ssh_public_key_material
 }
 
 resource aws_ssm_parameter owncloud_ssh_priv_key {

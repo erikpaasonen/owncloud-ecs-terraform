@@ -1,5 +1,5 @@
 locals {
-  mgmt_ip          = "${var.mgmt_ip}/32"
+  mgmt_ip          = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
   owncloud_version = "10.3.0"
 }
 
