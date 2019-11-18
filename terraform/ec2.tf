@@ -1,6 +1,18 @@
 locals {
-  mgmt_ip          = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
-  owncloud_version = "10.3.0"
+  mgmt_ip              = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
+  owncloud_version     = "10.3.0"
+  private_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].private_key_pem : file("~/.ssh/id_rsa")
+}
+
+# this is unfortunately a pet, not cattle, so let's have fun with that fact
+resource random_pet owncloud {
+  keepers = {
+    deploy_version     = "v0.0.1"
+    deploy_description = "updates"
+    ami_id             = data.aws_ami.ubuntu_18_04.id
+    vpc_id             = module.vpc.vpc_id
+    ssh_key            = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].public_key_fingerprint_md5 : sha1(var.ssh_public_key_material)
+  }
 }
 
 resource random_shuffle owncloud_priv_subnet {
@@ -39,7 +51,7 @@ resource aws_instance owncloud_test {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = tls_private_key.owncloud.private_key_pem
+    private_key = local.private_key_material
     host        = aws_instance.owncloud_test.public_ip
   }
 
@@ -52,7 +64,7 @@ resource null_resource install_owncloud {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = tls_private_key.owncloud.private_key_pem
+    private_key = local.private_key_material
     host        = aws_instance.owncloud_test.public_ip
   }
 
@@ -60,8 +72,6 @@ resource null_resource install_owncloud {
     inline = [
       "sudo apt-get --assume-yes update",
       "sudo apt-get --assume-yes install apache2 gpg unzip",
-      # "",
-      # "",
       # "",
     ]
   }
@@ -89,9 +99,13 @@ resource null_resource install_owncloud {
       "sudo a2enmod dir",
       "sudo a2enmod mime",
       "sudo a2enmod unique_id",
+      # "",
+    ]
+  }
+
+  provisioner remote-exec {
+    inline = [
       "sudo systemctl restart apache2",
-      # "",
-      # "",
       # "",
     ]
   }

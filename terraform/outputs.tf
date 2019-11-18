@@ -1,3 +1,7 @@
+output management_ip {
+  value = split("/", local.mgmt_ip)[0]
+}
+
 output owncloud_public_ip {
   value = aws_instance.owncloud_test.public_ip
 }
