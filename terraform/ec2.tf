@@ -47,73 +47,75 @@ resource aws_instance owncloud_test {
     encrypted             = true
   }
 
-  # another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = local.private_key_material
-    host        = aws_instance.owncloud_test.public_ip
-  }
+  user_data = data.template_cloudinit_config.install_owncloud.rendered
+
+  # # another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
+  # connection {
+  #   type        = "ssh"
+  #   user        = "ubuntu"
+  #   private_key = local.private_key_material
+  #   host        = aws_instance.owncloud_test.public_ip
+  # }
 
   tags = {
     Name = "owncloud-fromscratch-ubuntu1804-${random_pet.owncloud.id}"
   }
 }
 
-resource null_resource install_owncloud {
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = local.private_key_material
-    host        = aws_instance.owncloud_test.public_ip
-  }
+# resource null_resource install_owncloud {
+#   connection {
+#     type        = "ssh"
+#     user        = "ubuntu"
+#     private_key = local.private_key_material
+#     host        = aws_instance.owncloud_test.public_ip
+#   }
 
-  provisioner remote-exec {
-    inline = [
-      "sudo apt-get --assume-yes update",
-      "sudo apt-get --assume-yes install apache2 gpg unzip",
-      # "",
-    ]
-  }
+#   provisioner remote-exec {
+#     inline = [
+#       "sudo apt-get --assume-yes update",
+#       "sudo apt-get --assume-yes install apache2 gpg unzip",
+#       # "",
+#     ]
+#   }
 
-  provisioner file {
-    destination = "/tmp/owncloud.conf"
-    source      = "./apache-owncloud.conf"
-  }
+#   provisioner file {
+#     destination = "/tmp/owncloud.conf"
+#     source      = "./apache-owncloud.conf"
+#   }
 
-  provisioner remote-exec {
-    inline = [
-      "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
-      "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
-      "wget https://download.owncloud.org/owncloud.asc",
-      "gpg --import owncloud.asc",
-      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip",
-      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip.sha256",
-      "gpg --verify owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
-      "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
-      "unzip owncloud-${local.owncloud_version}.zip",
-      "sudo cp -r owncloud /var/www",
-      "sudo a2enmod rewrite",
-      "sudo a2enmod headers",
-      "sudo a2enmod env",
-      "sudo a2enmod dir",
-      "sudo a2enmod mime",
-      "sudo a2enmod unique_id",
-      # "",
-    ]
-  }
+#   provisioner remote-exec {
+#     inline = [
+#       "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
+#       "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
+#       "wget https://download.owncloud.org/owncloud.asc",
+#       "gpg --import owncloud.asc",
+#       "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip",
+#       "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip.sha256",
+#       "gpg --verify owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
+#       "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
+#       "unzip owncloud-${local.owncloud_version}.zip",
+#       "sudo cp -r owncloud /var/www",
+#       "sudo a2enmod rewrite",
+#       "sudo a2enmod headers",
+#       "sudo a2enmod env",
+#       "sudo a2enmod dir",
+#       "sudo a2enmod mime",
+#       "sudo a2enmod unique_id",
+#       # "",
+#     ]
+#   }
 
-  provisioner remote-exec {
-    inline = [
-      "sudo systemctl restart apache2",
-      # "",
-    ]
-  }
+#   provisioner remote-exec {
+#     inline = [
+#       "sudo systemctl restart apache2",
+#       # "",
+#     ]
+#   }
 
-  depends_on = [
-    aws_instance.owncloud_test,
-  ]
-}
+#   depends_on = [
+#     aws_instance.owncloud_test,
+#   ]
+# }
 
 resource aws_security_group owncloud_admin {
   name_prefix = "owncloud-admin-"

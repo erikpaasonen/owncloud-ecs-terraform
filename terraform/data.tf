@@ -20,6 +20,37 @@ data http my_public_ip {
   url = "https://ifconfig.me/ip"
 }
 
+data template_cloudinit_config install_owncloud {
+  gzip          = true
+  base64_encode = true
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "sudo apt-get --assume-yes update"
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "sudo apt-get --assume-yes install apache2 gpg unzip"
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "sudo apt-get --assume-yes update"
+  }
+
+  part {
+    filename     = "owncloud.conf"
+    content_type = "text/plaintext"
+    content      = file("./apache-owncloud.conf")
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = file("./owncloud-setup.sh")
+  }
+}
+
 # data aws_ami_ids all_ubuntu_amis {
 #   # owners = ["aws-marketplace"]
 
