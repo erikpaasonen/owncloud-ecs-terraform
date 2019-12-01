@@ -83,13 +83,11 @@ resource null_resource install_owncloud {
 
   provisioner remote-exec {
     inline = [
-      "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
-      "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
       "wget https://download.owncloud.org/owncloud.asc",
-      "gpg --import owncloud.asc",
+      # "gpg --import owncloud.asc",
       "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip",
       "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip.sha256",
-      "gpg --verify owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
+      "gpg --verify owncloud.asc owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
       "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
       "unzip owncloud-${local.owncloud_version}.zip",
       "sudo cp -r owncloud /var/www",
@@ -105,6 +103,9 @@ resource null_resource install_owncloud {
 
   provisioner remote-exec {
     inline = [
+      "sudo systemctl restart apache2",
+      "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
+      "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
       "sudo systemctl restart apache2",
       # "",
     ]

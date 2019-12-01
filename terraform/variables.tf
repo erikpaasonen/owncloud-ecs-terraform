@@ -4,6 +4,24 @@ variable mgmt_ip {
   default     = ""
 }
 
+variable owncloud_version {
+  type        = string
+  description = "The version of OwnCloud to install"
+  default     = "latest"
+}
+
+variable owncloud_domain {
+  type        = string
+  description = "The domain to configure in OwnCloud; note NOT an Active Directory domain, NOT related to RDS"
+  default     = "localhost"
+}
+
+# variable rds_allocated_storage {
+#   type = number
+#   description = "Number of gigabytes for the initial size of the RDS database"
+#   default = 20
+# }
+
 variable region {
   type        = string
   description = "Name of the AWS region where these resources should go"
