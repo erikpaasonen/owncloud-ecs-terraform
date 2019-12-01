@@ -1,3 +1,8 @@
+locals {
+  custom_domain_used = tobool(length(var.r53_domain_name) > 0)
+  custom_ssh_key_material_provided = tobool(length(var.ssh_public_key_material) > 0)
+}
+
 variable mgmt_ip {
   type        = string
   description = "IP address from which the OwnCloud instance will be managed"
@@ -21,6 +26,12 @@ variable owncloud_domain {
 #   description = "Number of gigabytes for the initial size of the RDS database"
 #   default = 20
 # }
+
+variable r53_domain_name {
+  type = string
+  description = "If you want your OwnCloud FQDN to utilize a domain hosted with AWS in Route 53, specify it here; otherwise, leave blank"
+  default = ""
+}
 
 variable region {
   type        = string

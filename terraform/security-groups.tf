@@ -17,7 +17,7 @@ resource aws_security_group rds_enablement {
     Name = "owncloud-${random_pet.this.id}-rds-sg"
   }
 
-  # allow RDS instances to communicate with each other
+  # allow RDS instances to communicate openly with each other
   ingress {
     from_port = 0
     to_port   = 0
@@ -25,7 +25,7 @@ resource aws_security_group rds_enablement {
     self      = true
   }
 
-  # allow traffic for TCP 3306
+  # allow traffic for TCP 3306 to any ENI which has the proper access SG attached
   ingress {
     from_port       = 3306
     to_port         = 3306
@@ -34,38 +34,9 @@ resource aws_security_group rds_enablement {
   }
 }
 
-resource aws_security_group owncloud_admin {
-  count = 0
-
-  name_prefix = "owncloud-admin-"
-  description = "${random_pet.this.id} - allow initial setup and break-glass mgmt of OwnCloud instance"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = [local.mgmt_ip]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [local.mgmt_ip]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [local.mgmt_ip]
-  }
-}
-
 resource aws_security_group owncloud_service {
   name_prefix = "owncloud-service-"
-  description = "${random_pet.this.id} - allow OwnCloud instance to serve OwnCloud service"
+  description = "${random_pet.this.id} - allow OwnCloud instance to serve OwnCloud service; restricted to management IP for testing"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -85,14 +56,14 @@ resource aws_security_group egress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0", "::0/0"]
   }
 
   egress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0", "::0/0"]
   }
 }
 
