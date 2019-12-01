@@ -1,18 +1,22 @@
+output kms_key_alias_name {
+  value = aws_kms_alias.owncloud.name
+}
+
 output management_ip {
   value = split("/", local.mgmt_ip)[0]
 }
 
-output owncloud_public_ip {
-  value = aws_instance.owncloud_test.public_ip
-}
+# output owncloud_public_ip {
+#   value = aws_instance.owncloud_test.public_ip
+# }
 
 output pet_name {
-  value = random_pet.owncloud.id
+  value = random_pet.this.id
 }
 
-output ubuntu_18_04_ami_id {
-  value = data.aws_ami.ubuntu_18_04.image_id
-}
+# output ubuntu_18_04_ami_id {
+#   value = data.aws_ami.ubuntu_18_04.image_id
+# }
 
 output vpc_azs {
   value = module.vpc.azs
