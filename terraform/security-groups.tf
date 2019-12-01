@@ -2,20 +2,12 @@ resource aws_security_group owncloud_rds_access {
   name        = "owncloud-${random_pet.this.id}-db-access-sg"
   description = "Attach this SG to resources to allow them to access RDS"
   vpc_id      = module.vpc.vpc_id
-
-  tags {
-    Name = "owncloud-${random_pet.this.id}-db-access-sg"
-  }
 }
 
 resource aws_security_group rds_enablement {
   name_prefix = "owncloud-${random_pet.this.id}-rds-sg-"
   description = "resource-specific SG attached ONLY to the RDS instance; NOT for attaching to things that need to access RDS"
   vpc_id      = module.vpc.vpc_id
-
-  tags {
-    Name = "owncloud-${random_pet.this.id}-rds-sg"
-  }
 
   # allow RDS instances to communicate openly with each other
   ingress {
@@ -56,14 +48,14 @@ resource aws_security_group egress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0", "::0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0", "::0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 

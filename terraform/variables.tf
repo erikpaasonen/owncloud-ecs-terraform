@@ -1,6 +1,9 @@
 locals {
-  custom_domain_used = tobool(length(var.r53_domain_name) > 0)
+  custom_domain_used               = tobool(length(var.r53_domain_name) > 0)
   custom_ssh_key_material_provided = tobool(length(var.ssh_public_key_material) > 0)
+  mgmt_ip                          = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
+  owncloud_version                 = "10.3.0"
+  private_key_material             = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].private_key_pem : file("~/.ssh/id_rsa")
 }
 
 variable mgmt_ip {
@@ -28,9 +31,15 @@ variable owncloud_domain {
 # }
 
 variable r53_domain_name {
-  type = string
+  type        = string
   description = "If you want your OwnCloud FQDN to utilize a domain hosted with AWS in Route 53, specify it here; otherwise, leave blank"
-  default = ""
+  default     = ""
+}
+
+variable rds_multi_az {
+  type        = bool
+  description = "Whether the RDS instance should span multiple availability zones; may impact cost"
+  default     = false
 }
 
 variable region {
