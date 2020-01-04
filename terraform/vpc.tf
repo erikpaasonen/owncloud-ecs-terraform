@@ -30,7 +30,7 @@ locals {
 }
 
 module vpc {
-  source = "terraform-aws-modules/vpc/aws"
+  source = "terraform-aws-modules/vpc/aws" # https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/outputs.tf
 
   name = "my-vpc"
   cidr = var.vpc_cidr

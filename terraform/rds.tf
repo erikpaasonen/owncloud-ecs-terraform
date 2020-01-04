@@ -1,43 +1,11 @@
 resource aws_db_subnet_group rds {
-  name        = "owncloud-${random_pet.this.id}-rds-subnet-group"
+  name        = "${local.owncloud_namespaced_hostname}-rds-subnet-group"
   description = "RDS subnet group for the RDS database used by OwnCloud"
   subnet_ids  = module.vpc.private_subnets
 }
 
-# resource aws_db_parameter_group owncloud {
-#   name_prefix = "owncloud-${random_pet.this.id}-db-"
-#   family      = "mariadb"
-
-#   # parameter {
-#   #   name  = "character_set_server"
-#   #   value = "utf8"
-#   # }
-
-#   # parameter {
-#   #   name  = "character_set_client"
-#   #   value = "utf8"
-#   # }
-# }
-
-resource aws_db_option_group owncloud {
-  name_prefix              = "owncloud-${random_pet.this.id}-db-"
-  option_group_description = "Terraform Option Group"
-  engine_name              = "mariadb"
-  major_engine_version     = "10.3"
-
-  # option {
-  #   option_name                   = "attach-security-groups"
-  #   db_security_group_memberships = [aws_security_group.rds_enablement.id]
-
-  #   # option_settings {
-  #   #   name  = "TIME_ZONE"
-  #   #   value = "UTC"
-  #   # }
-  # }
-}
-
 resource aws_db_instance rds {
-  identifier_prefix = "owncloud-${random_pet.this.id}-db-"
+  identifier_prefix = "${local.owncloud_namespaced_hostname}-db-"
   engine            = "mariadb"
   engine_version    = "10.3"
   instance_class    = "db.t3.micro"
@@ -53,10 +21,9 @@ resource aws_db_instance rds {
   kms_key_id        = aws_kms_key.owncloud.arn
   storage_encrypted = true
   username          = random_pet.owncloud_rds_db_username.id
-  password          = random_string.owncloud_rds_db_password.result
+  password          = random_password.owncloud_rds_db.result
 
   enabled_cloudwatch_logs_exports = [
-    # "alert",
     "audit",
     "error",
   ]
@@ -68,14 +35,59 @@ resource aws_db_instance rds {
   ]
 
   skip_final_snapshot       = true
-  final_snapshot_identifier = "rds-owncloud-${random_pet.this.id}-snapshot"
+  final_snapshot_identifier = "rds-${local.owncloud_namespaced_hostname}-snapshot"
 }
 
 resource random_pet owncloud_rds_db_username {
   separator = ""
 }
 
-resource random_string owncloud_rds_db_password {
-  length  = 35
-  special = false
-}
+# resource aws_db_parameter_group owncloud {
+#   name_prefix = "${local.owncloud_namespaced_hostname}-db-"
+#   family      = "mariadb"
+
+#   # parameter {
+#   #   name  = "character_set_server"
+#   #   value = "utf8"
+#   # }
+
+#   # parameter {
+#   #   name  = "character_set_client"
+#   #   value = "utf8"
+#   # }
+# }
+
+# resource aws_db_option_group owncloud {
+#   name_prefix              = "${local.owncloud_namespaced_hostname}-db-"
+#   option_group_description = "culled from OwnCloud Enterprise Docker Compose file" // https://doc.owncloud.org/server/10.3/admin_manual/installation/docker/
+#   engine_name              = "mariadb"
+#   major_engine_version     = "10.3"
+
+#   option {
+#     option_name = "max-allowed-packet"
+
+#     option_settings {
+#       name  = "MARIADB_MAX_ALLOWED_PACKET"
+#       value = "128M"
+#     }
+#   }
+
+#   option {
+#     option_name = "max-logfile-size"
+
+#     option_settings {
+#       name  = "MARIADB_INNODB_LOG_FILE_SIZE"
+#       value = "64M"
+#     }
+#   }
+
+#   # option {
+#   #   option_name                   = "attach-security-groups"
+#   #   db_security_group_memberships = [aws_security_group.rds_enablement.id]
+
+#   #   # option_settings {
+#   #   #   name  = "TIME_ZONE"
+#   #   #   value = "UTC"
+#   #   # }
+#   # }
+# }
