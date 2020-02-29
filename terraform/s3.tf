@@ -1,10 +1,10 @@
-# resource aws_s3_bucket owncloud_objectstore {
-#   bucket_prefix = "${local.owncloud_namespaced_hostname}-objectstore-"
+# resource aws_s3_bucket nextcloud_objectstore {
+#   bucket_prefix = "${local.nextcloud_namespaced_hostname}-objectstore-"
 
 #   server_side_encryption_configuration {
 #     rule {
 #       apply_server_side_encryption_by_default {
-#         kms_master_key_id = aws_kms_key.owncloud.arn
+#         kms_master_key_id = aws_kms_key.nextcloud.arn
 #         sse_algorithm     = "aws:kms"
 #       }
 #     }
@@ -35,12 +35,12 @@
 #   }
 # }
 
-# resource aws_s3_bucket_policy owncloud_objectstore {
-#   bucket = aws_s3_bucket.owncloud_objectstore.id
-#   policy = data.aws_iam_policy_document.owncloud_objectstore.json
+# resource aws_s3_bucket_policy nextcloud_objectstore {
+#   bucket = aws_s3_bucket.nextcloud_objectstore.id
+#   policy = data.aws_iam_policy_document.nextcloud_objectstore.json
 # }
 
-# data aws_iam_policy_document owncloud_objectstore {
+# data aws_iam_policy_document nextcloud_objectstore {
 #   statement {
 #     sid = "HTTPSOnly"
 
@@ -51,7 +51,7 @@
 #     ]
 
 #     resources = [
-#       aws_s3_bucket.owncloud_objectstore.arn,
+#       aws_s3_bucket.nextcloud_objectstore.arn,
 #     ]
 
 #     condition {
@@ -71,7 +71,7 @@
 #     ]
 
 #     resources = [
-#       aws_s3_bucket.owncloud_objectstore.arn,
+#       aws_s3_bucket.nextcloud_objectstore.arn,
 #     ]
 
 #     condition {

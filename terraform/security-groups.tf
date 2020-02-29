@@ -1,11 +1,11 @@
-resource aws_security_group owncloud_rds_access {
-  name        = "${local.owncloud_namespaced_hostname}-db-access-sg"
+resource aws_security_group nextcloud_rds_access {
+  name        = "${local.nextcloud_namespaced_hostname}-db-access-sg"
   description = "Attach this SG to resources to allow them to access RDS"
   vpc_id      = module.vpc.vpc_id
 }
 
 resource aws_security_group rds_enablement {
-  name_prefix = "${local.owncloud_namespaced_hostname}-rds-sg-"
+  name_prefix = "${local.nextcloud_namespaced_hostname}-rds-sg-"
   description = "resource-specific SG attached ONLY to the RDS instance; NOT for attaching to things that need to access RDS"
   vpc_id      = module.vpc.vpc_id
 
@@ -22,13 +22,13 @@ resource aws_security_group rds_enablement {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = ["${aws_security_group.owncloud_rds_access.id}"]
+    security_groups = ["${aws_security_group.nextcloud_rds_access.id}"]
   }
 }
 
-resource aws_security_group owncloud_service {
-  name_prefix = "owncloud-service-"
-  description = "${random_pet.this.id} - allow OwnCloud instance to serve OwnCloud service; restricted to management IP for testing"
+resource aws_security_group nextcloud_service {
+  name_prefix = "nextcloud-service-"
+  description = "${random_pet.this.id} - allow nextcloud instance to serve nextcloud service; restricted to management IP for testing"
   vpc_id      = module.vpc.vpc_id
 
   ingress {

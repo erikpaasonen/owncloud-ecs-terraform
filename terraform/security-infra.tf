@@ -1,11 +1,11 @@
 locals {
-  public_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].public_key_openssh : var.ssh_public_key_material
+  public_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_openssh : var.ssh_public_key_material
 }
 
-resource aws_acm_certificate owncloud {
+resource aws_acm_certificate nextcloud {
   count = local.custom_domain_used ? 1 : 0
 
-  domain_name       = "owncloud.${var.r53_domain_name}"
+  domain_name       = "nextcloud.${var.r53_domain_name}"
   validation_method = "DNS"
 
   lifecycle {
@@ -23,17 +23,17 @@ data aws_route53_zone zone {
 resource aws_route53_record cert_validation {
   count = local.custom_domain_used ? 1 : 0
 
-  name    = aws_acm_certificate.owncloud[0].domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.owncloud[0].domain_validation_options.0.resource_record_type
+  name    = aws_acm_certificate.nextcloud[0].domain_validation_options.0.resource_record_name
+  type    = aws_acm_certificate.nextcloud[0].domain_validation_options.0.resource_record_type
   zone_id = data.aws_route53_zone.zone[0].id
-  records = [aws_acm_certificate.owncloud[0].domain_validation_options.0.resource_record_value]
+  records = [aws_acm_certificate.nextcloud[0].domain_validation_options.0.resource_record_value]
   ttl     = 60
 }
 
 resource aws_acm_certificate_validation cert {
   count = local.custom_domain_used ? 1 : 0
 
-  certificate_arn         = aws_acm_certificate.owncloud[0].arn
+  certificate_arn         = aws_acm_certificate.nextcloud[0].arn
   validation_record_fqdns = [aws_route53_record.cert_validation[0].fqdn]
 }
 
@@ -42,17 +42,17 @@ resource aws_key_pair deployer {
   public_key = local.public_key_material
 }
 
-resource tls_private_key owncloud {
+resource tls_private_key nextcloud {
   count = local.custom_ssh_key_material_provided ? 0 : 1
 
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-resource aws_kms_key owncloud {
+resource aws_kms_key nextcloud {
 }
 
-resource aws_kms_alias owncloud {
-  name_prefix   = "alias/${local.owncloud_namespaced_hostname}-"
-  target_key_id = aws_kms_key.owncloud.key_id
+resource aws_kms_alias nextcloud {
+  name_prefix   = "alias/${local.nextcloud_namespaced_hostname}-"
+  target_key_id = aws_kms_key.nextcloud.key_id
 }

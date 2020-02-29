@@ -1,41 +1,41 @@
 locals {
   mgmt_ip              = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
-  owncloud_version     = "10.3.0"
-  private_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].private_key_pem : file("~/.ssh/id_rsa")
+  nextcloud_version     = "10.3.0"
+  private_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].private_key_pem : file("~/.ssh/id_rsa")
 }
 
 # this is unfortunately a pet, not cattle, so let's have fun with that fact
-resource random_pet owncloud {
+resource random_pet nextcloud {
   keepers = {
     deploy_version     = "v0.0.1"
     deploy_description = "updates"
     ami_id             = data.aws_ami.ubuntu_18_04.id
     vpc_id             = module.vpc.vpc_id
-    ssh_key            = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].public_key_fingerprint_md5 : sha1(var.ssh_public_key_material)
+    ssh_key            = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_fingerprint_md5 : sha1(var.ssh_public_key_material)
   }
 }
 
-resource random_shuffle owncloud_priv_subnet {
+resource random_shuffle nextcloud_priv_subnet {
   input        = module.vpc.public_subnets
   result_count = 1
 
   keepers = {
-    random_pet = random_pet.owncloud.id,
+    random_pet = random_pet.nextcloud.id,
   }
 }
 
-resource aws_instance owncloud_test {
+resource aws_instance nextcloud_test {
   ami           = data.aws_ami.ubuntu_18_04.image_id
   instance_type = "t3.micro"
   key_name      = aws_key_pair.deployer.key_name
 
   associate_public_ip_address = true
 
-  subnet_id = random_shuffle.owncloud_priv_subnet.result[0]
+  subnet_id = random_shuffle.nextcloud_priv_subnet.result[0]
 
   vpc_security_group_ids = [
-    aws_security_group.owncloud_admin.id,
-    aws_security_group.owncloud_service.id,
+    aws_security_group.nextcloud_admin.id,
+    aws_security_group.nextcloud_service.id,
     aws_security_group.egress.id,
     aws_security_group.to_s3.id,
   ]
@@ -52,20 +52,20 @@ resource aws_instance owncloud_test {
     type        = "ssh"
     user        = "ubuntu"
     private_key = local.private_key_material
-    host        = aws_instance.owncloud_test.public_ip
+    host        = aws_instance.nextcloud_test.public_ip
   }
 
   tags = {
-    Name = "owncloud-fromscratch-ubuntu1804-${random_pet.owncloud.id}"
+    Name = "nextcloud-fromscratch-ubuntu1804-${random_pet.nextcloud.id}"
   }
 }
 
-resource null_resource install_owncloud {
+resource null_resource install_nextcloud {
   connection {
     type        = "ssh"
     user        = "ubuntu"
     private_key = local.private_key_material
-    host        = aws_instance.owncloud_test.public_ip
+    host        = aws_instance.nextcloud_test.public_ip
   }
 
   provisioner remote-exec {
@@ -77,20 +77,20 @@ resource null_resource install_owncloud {
   }
 
   provisioner file {
-    destination = "/tmp/owncloud.conf"
-    source      = "./apache-owncloud.conf"
+    destination = "/tmp/nextcloud.conf"
+    source      = "./apache-nextcloud.conf"
   }
 
   provisioner remote-exec {
     inline = [
-      "wget https://download.owncloud.org/owncloud.asc",
-      # "gpg --import owncloud.asc",
-      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip",
-      "wget https://download.owncloud.org/community/owncloud-${local.owncloud_version}.zip.sha256",
-      "gpg --verify owncloud.asc owncloud-${local.owncloud_version}.zip owncloud-${local.owncloud_version}.zip.sha256",
-      "sha256sum -c owncloud-${local.owncloud_version}.zip.sha256 < owncloud-${local.owncloud_version}.zip",
-      "unzip owncloud-${local.owncloud_version}.zip",
-      "sudo cp -r owncloud /var/www",
+      "wget https://download.nextcloud.org/nextcloud.asc",
+      # "gpg --import nextcloud.asc",
+      "wget https://download.nextcloud.org/community/nextcloud-${local.nextcloud_version}.zip",
+      "wget https://download.nextcloud.org/community/nextcloud-${local.nextcloud_version}.zip.sha256",
+      "gpg --verify nextcloud.asc nextcloud-${local.nextcloud_version}.zip nextcloud-${local.nextcloud_version}.zip.sha256",
+      "sha256sum -c nextcloud-${local.nextcloud_version}.zip.sha256 < nextcloud-${local.nextcloud_version}.zip",
+      "unzip nextcloud-${local.nextcloud_version}.zip",
+      "sudo cp -r nextcloud /var/www",
       "sudo a2enmod rewrite",
       "sudo a2enmod headers",
       "sudo a2enmod env",
@@ -104,21 +104,21 @@ resource null_resource install_owncloud {
   provisioner remote-exec {
     inline = [
       "sudo systemctl restart apache2",
-      "sudo mv /tmp/owncloud.conf /etc/apache2/sites-available/owncloud.conf",
-      "ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-enabled/owncloud.conf",
+      "sudo mv /tmp/nextcloud.conf /etc/apache2/sites-available/nextcloud.conf",
+      "ln -s /etc/apache2/sites-available/nextcloud.conf /etc/apache2/sites-enabled/nextcloud.conf",
       "sudo systemctl restart apache2",
       # "",
     ]
   }
 
   depends_on = [
-    aws_instance.owncloud_test,
+    aws_instance.nextcloud_test,
   ]
 }
 
-resource aws_security_group owncloud_admin {
-  name_prefix = "owncloud-admin-"
-  description = "${random_pet.owncloud.id} - allow initial setup and break-glass mgmt of OwnCloud instance"
+resource aws_security_group nextcloud_admin {
+  name_prefix = "nextcloud-admin-"
+  description = "${random_pet.nextcloud.id} - allow initial setup and break-glass mgmt of nextcloud instance"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -143,9 +143,9 @@ resource aws_security_group owncloud_admin {
   }
 }
 
-resource aws_security_group owncloud_service {
-  name_prefix = "owncloud-service-"
-  description = "${random_pet.owncloud.id} - allow OwnCloud instance to serve OwnCloud service"
+resource aws_security_group nextcloud_service {
+  name_prefix = "nextcloud-service-"
+  description = "${random_pet.nextcloud.id} - allow nextcloud instance to serve nextcloud service"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -158,7 +158,7 @@ resource aws_security_group owncloud_service {
 
 resource aws_security_group egress {
   name_prefix = "egress-"
-  description = "${random_pet.owncloud.id} - allows HTTP and HTTPS egress to the whole Internet"
+  description = "${random_pet.nextcloud.id} - allows HTTP and HTTPS egress to the whole Internet"
   vpc_id      = module.vpc.vpc_id
 
   egress {
@@ -178,7 +178,7 @@ resource aws_security_group egress {
 
 resource aws_security_group to_s3 {
   name_prefix = "s3-"
-  description = "${random_pet.owncloud.id} - allows HTTPS egress to the VPC S3 endpoint"
+  description = "${random_pet.nextcloud.id} - allows HTTPS egress to the VPC S3 endpoint"
   vpc_id      = module.vpc.vpc_id
 
   egress {

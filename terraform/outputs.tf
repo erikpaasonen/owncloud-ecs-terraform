@@ -1,5 +1,5 @@
 output kms_key_alias_name {
-  value = aws_kms_alias.owncloud.name
+  value = aws_kms_alias.nextcloud.name
 }
 
 output management_ip {

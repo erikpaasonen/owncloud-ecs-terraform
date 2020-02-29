@@ -1,27 +1,27 @@
 resource aws_db_subnet_group rds {
-  name        = "${local.owncloud_namespaced_hostname}-rds-subnet-group"
-  description = "RDS subnet group for the RDS database used by OwnCloud"
+  name        = "${local.nextcloud_namespaced_hostname}-rds-subnet-group"
+  description = "RDS subnet group for the RDS database used by nextcloud"
   subnet_ids  = module.vpc.private_subnets
 }
 
 resource aws_db_instance rds {
-  identifier_prefix = "${local.owncloud_namespaced_hostname}-db-"
+  identifier_prefix = "${local.nextcloud_namespaced_hostname}-db-"
   engine            = "mariadb"
   engine_version    = "10.3"
   instance_class    = "db.t3.micro"
   multi_az          = var.rds_multi_az
-  name              = "owncloud"
+  name              = "nextcloud"
 
-  # parameter_group_name = aws_db_parameter_group.owncloud.name
+  # parameter_group_name = aws_db_parameter_group.nextcloud.name
 
   # allocated_storage = var.allocated_storage
   allocated_storage     = 20
   max_allocated_storage = 100
 
-  kms_key_id        = aws_kms_key.owncloud.arn
+  kms_key_id        = aws_kms_key.nextcloud.arn
   storage_encrypted = true
-  username          = random_pet.owncloud_rds_db_username.id
-  password          = random_password.owncloud_rds_db.result
+  username          = random_pet.nextcloud_rds_db_username.id
+  password          = random_password.nextcloud_rds_db.result
 
   enabled_cloudwatch_logs_exports = [
     "audit",
@@ -35,15 +35,15 @@ resource aws_db_instance rds {
   ]
 
   skip_final_snapshot       = true
-  final_snapshot_identifier = "rds-${local.owncloud_namespaced_hostname}-snapshot"
+  final_snapshot_identifier = "rds-${local.nextcloud_namespaced_hostname}-snapshot"
 }
 
-resource random_pet owncloud_rds_db_username {
+resource random_pet nextcloud_rds_db_username {
   separator = ""
 }
 
-# resource aws_db_parameter_group owncloud {
-#   name_prefix = "${local.owncloud_namespaced_hostname}-db-"
+# resource aws_db_parameter_group nextcloud {
+#   name_prefix = "${local.nextcloud_namespaced_hostname}-db-"
 #   family      = "mariadb"
 
 #   # parameter {
@@ -57,9 +57,9 @@ resource random_pet owncloud_rds_db_username {
 #   # }
 # }
 
-# resource aws_db_option_group owncloud {
-#   name_prefix              = "${local.owncloud_namespaced_hostname}-db-"
-#   option_group_description = "culled from OwnCloud Enterprise Docker Compose file" // https://doc.owncloud.org/server/10.3/admin_manual/installation/docker/
+# resource aws_db_option_group nextcloud {
+#   name_prefix              = "${local.nextcloud_namespaced_hostname}-db-"
+#   option_group_description = "culled from nextcloud Enterprise Docker Compose file" // https://doc.nextcloud.org/server/10.3/admin_manual/installation/docker/
 #   engine_name              = "mariadb"
 #   major_engine_version     = "10.3"
 

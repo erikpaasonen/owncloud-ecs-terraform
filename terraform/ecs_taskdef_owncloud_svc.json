@@ -1,7 +1,7 @@
 [
   {
     "name": "main-service",
-    "image": "owncloud/server:${owncloud_version}",
+    "image": "nextcloud/server:${nextcloud_version}",
     "cpu": 128,
     "memory": 256,
     "portMappings": [
@@ -14,36 +14,36 @@
     "essential": true,
     "environment": [
       {
-        "name": "OWNCLOUD_DOMAIN",
-        "value": "${owncloud_clientaccess_fqdn}"
+        "name": "nextcloud_DOMAIN",
+        "value": "${nextcloud_clientaccess_fqdn}"
       },
       {
-        "name": "OWNCLOUD_DB_HOST",
-        "value": "${owncloud_db_hostname}"
+        "name": "nextcloud_DB_HOST",
+        "value": "${nextcloud_db_hostname}"
       },
       {
-        "name": "OWNCLOUD_DB_TYPE",
+        "name": "nextcloud_DB_TYPE",
         "value": "mariadb"
       },
       {
-        "name": "OWNCLOUD_DB_NAME",
-        "value": "${owncloud_db_db_name}"
+        "name": "nextcloud_DB_NAME",
+        "value": "${nextcloud_db_db_name}"
       },
       {
-        "name": "OWNCLOUD_DB_USERNAME",
-        "value": "${owncloud_db_username}"
+        "name": "nextcloud_DB_USERNAME",
+        "value": "${nextcloud_db_username}"
       },
       {
-        "name": "OWNCLOUD_ENABLE_CERTIFICATE_MANAGEMENT",
+        "name": "nextcloud_ENABLE_CERTIFICATE_MANAGEMENT",
         "value": "true"
       },
       {
-        "name": "OWNCLOUD_REDIS_ENABLED",
+        "name": "nextcloud_REDIS_ENABLED",
         "value": "true"
       },
       {
-        "name": "OWNCLOUD_REDIS_HOST",
-        "value": "${owncloud_redis_hostname}"
+        "name": "nextcloud_REDIS_HOST",
+        "value": "${nextcloud_redis_hostname}"
       }
     ],
     "mountPoints": [
@@ -54,7 +54,7 @@
     ],
     "secrets": [
       {
-        "name": "OWNCLOUD_ADMIN_PASSWORD",
+        "name": "nextcloud_ADMIN_PASSWORD",
         "valueFrom": "${paramstore_admin_pwd}"
       }
     ],

@@ -1,19 +1,19 @@
-resource aws_iam_role owncloud_ecs_exec {
-  name               = "${local.owncloud_namespaced_hostname}-ecs-execution"
-  assume_role_policy = data.aws_iam_policy_document.assumerole_owncloud_ecs_exec.json
+resource aws_iam_role nextcloud_ecs_exec {
+  name               = "${local.nextcloud_namespaced_hostname}-ecs-execution"
+  assume_role_policy = data.aws_iam_policy_document.assumerole_nextcloud_ecs_exec.json
 }
 
-resource aws_iam_role_policy_attachment owncloud_ecs_exec {
-  role       = aws_iam_role.owncloud_ecs_exec.name
-  policy_arn = aws_iam_policy.owncloud_ecs_exec.arn
+resource aws_iam_role_policy_attachment nextcloud_ecs_exec {
+  role       = aws_iam_role.nextcloud_ecs_exec.name
+  policy_arn = aws_iam_policy.nextcloud_ecs_exec.arn
 }
 
-resource aws_iam_policy owncloud_ecs_exec {
-  name   = "${local.owncloud_namespaced_hostname}-ecs-execution"
-  policy = data.aws_iam_policy_document.owncloud_ecs_exec.json
+resource aws_iam_policy nextcloud_ecs_exec {
+  name   = "${local.nextcloud_namespaced_hostname}-ecs-execution"
+  policy = data.aws_iam_policy_document.nextcloud_ecs_exec.json
 }
 
-data aws_iam_policy_document assumerole_owncloud_ecs_exec {
+data aws_iam_policy_document assumerole_nextcloud_ecs_exec {
   statement {
     principals {
       type        = "Service"
@@ -24,7 +24,7 @@ data aws_iam_policy_document assumerole_owncloud_ecs_exec {
   }
 }
 
-data aws_iam_policy_document owncloud_ecs_exec {
+data aws_iam_policy_document nextcloud_ecs_exec {
   statement {
     sid = "AllowRetrieveSecretsValuesFromParamStore"
 
@@ -33,8 +33,8 @@ data aws_iam_policy_document owncloud_ecs_exec {
     ]
 
     resources = [
-      aws_ssm_parameter.owncloud_admin_passwd.arn,
-      aws_ssm_parameter.owncloud_db_passwd.arn,
+      aws_ssm_parameter.nextcloud_admin_passwd.arn,
+      aws_ssm_parameter.nextcloud_db_passwd.arn,
     ]
   }
 
@@ -46,7 +46,7 @@ data aws_iam_policy_document owncloud_ecs_exec {
     ]
 
     resources = [
-      aws_kms_alias.owncloud.arn,
+      aws_kms_alias.nextcloud.arn,
     ]
   }
 }

@@ -2,21 +2,21 @@ locals {
   custom_domain_used                 = tobool(length(var.r53_domain_name) > 0)
   custom_ssh_key_material_provided   = tobool(length(var.ssh_public_key_material) > 0)
   mgmt_ip                            = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
-  owncloud_namespaced_hostname       = "owncloud-${random_pet.this.id}"
-  owncloud_namespaced_db_hostname    = "${local.owncloud_namespaced_hostname}-db"
-  owncloud_namespaced_redis_hostname = "${local.owncloud_namespaced_hostname}-redis"
-  private_key_material               = length(var.ssh_public_key_material) == 0 ? tls_private_key.owncloud[0].private_key_pem : file("~/.ssh/id_rsa")
+  nextcloud_namespaced_hostname       = "nextcloud-${random_pet.this.id}"
+  nextcloud_namespaced_db_hostname    = "${local.nextcloud_namespaced_hostname}-db"
+  nextcloud_namespaced_redis_hostname = "${local.nextcloud_namespaced_hostname}-redis"
+  private_key_material               = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].private_key_pem : file("~/.ssh/id_rsa")
 }
 
 variable mgmt_ip {
   type        = string
-  description = "IP address from which the OwnCloud instance will be managed"
+  description = "IP address from which the nextcloud instance will be managed"
   default     = ""
 }
 
-variable owncloud_version {
+variable nextcloud_version {
   type        = string
-  description = "The version of OwnCloud to install"
+  description = "The version of nextcloud to install"
   default     = "latest"
 }
 
@@ -28,7 +28,7 @@ variable owncloud_version {
 
 variable r53_domain_name {
   type        = string
-  description = "If you want your OwnCloud FQDN to utilize a domain hosted with AWS in Route 53, specify it here; otherwise, leave blank"
+  description = "If you want your nextcloud FQDN to utilize a domain hosted with AWS in Route 53, specify it here; otherwise, leave blank"
   default     = ""
 }
 
