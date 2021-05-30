@@ -1,7 +1,3 @@
-locals {
-  public_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_openssh : var.ssh_public_key_material
-}
-
 resource aws_acm_certificate nextcloud {
   count = local.custom_domain_used ? 1 : 0
 
