@@ -2,7 +2,22 @@ resource "aws_ecs_cluster" "nextcloud" {
   name = local.nextcloud_namespaced_hostname
 }
 
-resource "aws_ecs_task_definition" "nextcloud_service" {
+resource "aws_ecs_service" "nextcloud" {
+  name = "nextcloud-service-${random_pet.this.id}"
+  cluster = aws_ecs_cluster.nextcloud.id
+  task_definition = aws_ecs_task_definition.nextcloud.arn
+  launch_type = "FARGATE"
+  desired_count = 1
+  
+  network_configuration {
+    subnets = module.vpc.private_subnets
+    security_groups = [
+      aws_security_group.nextcloud_service.id,      
+    ]
+  }
+}
+
+resource "aws_ecs_task_definition" "nextcloud" {
   family       = "nextcloud-service-${random_pet.this.id}"
   network_mode = "awsvpc"
 
@@ -132,33 +147,3 @@ resource "aws_ecs_task_definition" "nextcloud_service" {
   }
   ])
 }
-
-
-
-
-
-
-
-
-
-
-# resource aws_ecs_task_definition nextcloud_redis {
-#   family       = "nextcloud-redis-${random_pet.this.id}"
-#   network_mode = "awsvpc"
-
-#   requires_compatibilities = ["FARGATE"]
-#   cpu                      = 256 # 0.25CPU
-#   memory                   = 512 # MiB
-
-#   volume {
-#     name      = "redis"
-#     host_path = "/var/lib/redis"
-
-#     docker_volume_configuration {
-#       scope         = "shared"
-#       autoprovision = true
-#     }
-#   }
-
-#   container_definitions = file("nextcloud_redis.json")
-# }
