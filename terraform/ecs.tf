@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "nextcloud_service" {
   }
 
   container_definitions = templatefile(
-    "ecs_taskdef_nextcloud_svc.json",
+    "${path.module}/ecs_taskdef_nextcloud_svc.json",
     {
       "nextcloud_clientaccess_fqdn" : "${local.nextcloud_namespaced_hostname}.${var.r53_domain_name}",
       "nextcloud_hostname" : local.nextcloud_namespaced_hostname,

@@ -13,7 +13,8 @@ data "aws_availability_zones" "current" {
 }
 
 data "aws_vpc_endpoint_service" "s3" {
-  service = "s3"
+  service      = "s3"
+  service_type = "Gateway"
 }
 
 data "http" "my_public_ip" {
