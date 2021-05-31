@@ -1,10 +1,10 @@
-resource aws_db_subnet_group rds {
+resource "aws_db_subnet_group" "rds" {
   name        = "${local.nextcloud_namespaced_hostname}-rds-subnet-group"
   description = "RDS subnet group for the RDS database used by nextcloud"
   subnet_ids  = module.vpc.private_subnets
 }
 
-resource aws_db_instance rds {
+resource "aws_db_instance" "rds" {
   identifier_prefix = "${local.nextcloud_namespaced_hostname}-db-"
   engine            = "mariadb"
   engine_version    = "10.3"
@@ -38,7 +38,7 @@ resource aws_db_instance rds {
   final_snapshot_identifier = "rds-${local.nextcloud_namespaced_hostname}-snapshot"
 }
 
-resource random_pet nextcloud_rds_db_username {
+resource "random_pet" "nextcloud_rds_db_username" {
   separator = ""
 }
 

@@ -1,11 +1,11 @@
-provider aws {
-  region  = var.region
+provider "aws" {
+  region = var.region
 }
 
-provider http {}
+provider "http" {}
 
-provider null {}
+provider "null" {}
 
-provider random {}
+provider "random" {}
 
-provider tls {}
+provider "tls" {}

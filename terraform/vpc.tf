@@ -29,7 +29,7 @@ locals {
   # enable_sqs_endpoint           = true
 }
 
-module vpc {
+module "vpc" {
   source = "terraform-aws-modules/vpc/aws" # https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/outputs.tf
 
   name = "my-vpc"

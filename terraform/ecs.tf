@@ -2,11 +2,11 @@
 #   name = "nextcloud"
 # }
 
-resource aws_ecs_cluster nextcloud {
+resource "aws_ecs_cluster" "nextcloud" {
   name = local.nextcloud_namespaced_hostname
 }
 
-resource aws_ecs_task_definition nextcloud_service {
+resource "aws_ecs_task_definition" "nextcloud_service" {
   family       = "nextcloud-service-${random_pet.this.id}"
   network_mode = "awsvpc"
 

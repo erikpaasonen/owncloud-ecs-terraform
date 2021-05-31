@@ -9,13 +9,13 @@ locals {
   public_key_material                 = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_openssh : var.ssh_public_key_material
 }
 
-variable mgmt_ip {
+variable "mgmt_ip" {
   type        = string
   description = "IP address from which the nextcloud instance will be managed"
   default     = ""
 }
 
-variable nextcloud_version {
+variable "nextcloud_version" {
   type        = string
   description = "The version of nextcloud to install"
   default     = "latest"
@@ -27,37 +27,37 @@ variable nextcloud_version {
 #   default = 20
 # }
 
-variable r53_domain_name {
+variable "r53_domain_name" {
   type        = string
   description = "If you want your nextcloud FQDN to utilize a domain hosted with AWS in Route 53, specify it here; otherwise, leave blank"
   default     = ""
 }
 
-variable rds_multi_az {
+variable "rds_multi_az" {
   type        = bool
   description = "Whether the RDS instance should span multiple availability zones; may impact cost"
   default     = false
 }
 
-variable region {
+variable "region" {
   type        = string
   description = "Name of the AWS region where these resources should go"
   default     = "us-east-1"
 }
 
-variable ssh_public_key_material {
+variable "ssh_public_key_material" {
   type        = string
   description = "The public key of an SSH key pair to be used to admin the EC2 instance; if none provided, one will be generated and its private key stored in Parameter Store"
   default     = ""
 }
 
-variable vpc_cidr {
+variable "vpc_cidr" {
   type        = string
   description = "subnet specified in CIDR format (e.g. 10.0.0.0/24) to be used as the base CIDR for the VPC"
   default     = "10.0.0.0/24"
 }
 
-variable vpc_subnet_count {
+variable "vpc_subnet_count" {
   type        = number
   description = "positive integer count of how many public/private pairs of subnets are desired; if more than the number of available AZs, the number of AZs will override this"
   default     = 4

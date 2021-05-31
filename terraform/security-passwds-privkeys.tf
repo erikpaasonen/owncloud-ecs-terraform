@@ -2,11 +2,11 @@ locals {
   paramstore_creds_path = "/creds/nextcloud_test/${random_pet.this.id}"
 }
 
-resource random_password nextcloud_admin {
+resource "random_password" "nextcloud_admin" {
   length = 30
 }
 
-resource aws_ssm_parameter nextcloud_admin_passwd {
+resource "aws_ssm_parameter" "nextcloud_admin_passwd" {
   name        = "${local.paramstore_creds_path}/admin_passwd"
   description = "securely storing the password for the nextcloud admin user"
 
@@ -16,11 +16,11 @@ resource aws_ssm_parameter nextcloud_admin_passwd {
   overwrite = true
 }
 
-resource random_password nextcloud_db {
+resource "random_password" "nextcloud_db" {
   length = 30
 }
 
-resource aws_ssm_parameter nextcloud_db_passwd {
+resource "aws_ssm_parameter" "nextcloud_db_passwd" {
   name        = "${local.paramstore_creds_path}/db_passwd"
   description = "securely storing the password for the nextcloud db user"
 
@@ -30,11 +30,11 @@ resource aws_ssm_parameter nextcloud_db_passwd {
   overwrite = true
 }
 
-resource random_password nextcloud_rds_db {
+resource "random_password" "nextcloud_rds_db" {
   length = 30
 }
 
-resource aws_ssm_parameter nextcloud_ssh_priv_key {
+resource "aws_ssm_parameter" "nextcloud_ssh_priv_key" {
   count = local.custom_ssh_key_material_provided ? 0 : 1
 
   name        = "${local.paramstore_creds_path}/ssh_priv_key_material"

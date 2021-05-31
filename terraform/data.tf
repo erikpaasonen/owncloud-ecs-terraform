@@ -8,15 +8,15 @@
 #   }
 # }
 
-data aws_availability_zones current {
+data "aws_availability_zones" "current" {
   state = "available"
 }
 
-data aws_vpc_endpoint_service s3 {
+data "aws_vpc_endpoint_service" "s3" {
   service = "s3"
 }
 
-data http my_public_ip {
+data "http" "my_public_ip" {
   url = "https://ifconfig.me/ip"
 }
 

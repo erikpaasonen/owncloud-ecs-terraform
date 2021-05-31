@@ -1,10 +1,10 @@
-resource aws_security_group nextcloud_rds_access {
+resource "aws_security_group" "nextcloud_rds_access" {
   name        = "${local.nextcloud_namespaced_hostname}-db-access-sg"
   description = "Attach this SG to resources to allow them to access RDS"
   vpc_id      = module.vpc.vpc_id
 }
 
-resource aws_security_group rds_enablement {
+resource "aws_security_group" "rds_enablement" {
   name_prefix = "${local.nextcloud_namespaced_hostname}-rds-sg-"
   description = "resource-specific SG attached ONLY to the RDS instance; NOT for attaching to things that need to access RDS"
   vpc_id      = module.vpc.vpc_id
@@ -26,7 +26,7 @@ resource aws_security_group rds_enablement {
   }
 }
 
-resource aws_security_group nextcloud_service {
+resource "aws_security_group" "nextcloud_service" {
   name_prefix = "nextcloud-service-"
   description = "${random_pet.this.id} - allow nextcloud instance to serve nextcloud service; restricted to management IP for testing"
   vpc_id      = module.vpc.vpc_id
@@ -39,7 +39,7 @@ resource aws_security_group nextcloud_service {
   }
 }
 
-resource aws_security_group egress {
+resource "aws_security_group" "egress" {
   name_prefix = "egress-"
   description = "${random_pet.this.id} - allows HTTP and HTTPS egress to the whole Internet"
   vpc_id      = module.vpc.vpc_id
@@ -59,7 +59,7 @@ resource aws_security_group egress {
   }
 }
 
-resource aws_security_group to_s3 {
+resource "aws_security_group" "to_s3" {
   name_prefix = "s3-"
   description = "${random_pet.this.id} - allows HTTPS egress to the VPC S3 endpoint"
   vpc_id      = module.vpc.vpc_id
