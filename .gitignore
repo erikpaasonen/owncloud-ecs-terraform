@@ -11,3 +11,7 @@
 
 # plan file
 *tfplan
+*the_plan
+
+# sandbox config
+terraform/sandbox
