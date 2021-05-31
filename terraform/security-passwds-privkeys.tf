@@ -32,6 +32,7 @@ resource "aws_ssm_parameter" "nextcloud_db_passwd" {
 
 resource "random_password" "nextcloud_rds_db" {
   length = 30
+  override_special = "/\"@"
 }
 
 resource "aws_ssm_parameter" "nextcloud_ssh_priv_key" {
