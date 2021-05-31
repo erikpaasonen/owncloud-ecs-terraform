@@ -7,11 +7,9 @@ locals {
   cidr_newbits_max_range = 27 - local.vpc_cidr_base_bits
   eligible_cidr_bits     = [for i in range(local.cidr_newbits_max_range) : i if pow(2, i) >= local.vpc_subnet_count_validated]
   cidr_newbits           = local.eligible_cidr_bits[0]
-  # all_vpc_subnets        = cidrsubnets(var.vpc_cidr, [for i in range(local.vpc_subnet_count_validated) : local.cidr_newbits])
-  all_vpc_subnets = [for i in range(local.vpc_subnet_count_validated) : cidrsubnet(var.vpc_cidr, local.cidr_newbits, i)]
-
-  public_subnets  = [for cidr in local.all_vpc_subnets : cidrsubnet(cidr, 1, 0)]
-  private_subnets = [for cidr in local.all_vpc_subnets : cidrsubnet(cidr, 1, 1)]
+  all_vpc_subnets        = [for i in range(local.vpc_subnet_count_validated) : cidrsubnet(var.vpc_cidr, local.cidr_newbits, i)]
+  public_subnets         = [for cidr in local.all_vpc_subnets : cidrsubnet(cidr, 1, 0)]
+  private_subnets        = [for cidr in local.all_vpc_subnets : cidrsubnet(cidr, 1, 1)]
 
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -30,7 +28,8 @@ locals {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws" # https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/outputs.tf
+  # https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/outputs.tf
+  source = "terraform-aws-modules/vpc/aws"
 
   name = "my-vpc"
   cidr = var.vpc_cidr
