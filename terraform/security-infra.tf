@@ -1,5 +1,5 @@
 module "custom_domain" {
-  count  = local.custom_domain_used ? 1 : 0
+  for_each = toset(compact([var.r53_domain_name]))
   source = "../modules/custom_domain"
 
   r53_domain_name = var.r53_domain_name
