@@ -67,11 +67,11 @@ resource "aws_ecs_task_definition" "nextcloud_service" {
       },
       {
         "name": "nextcloud_ENABLE_CERTIFICATE_MANAGEMENT",
-        "value": true
+        "value": "true"
       },
       {
         "name": "nextcloud_REDIS_ENABLED",
-        "value": true
+        "value": "true"
       },
       {
         "name": "nextcloud_REDIS_HOST",
