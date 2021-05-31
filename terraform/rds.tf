@@ -6,8 +6,8 @@ resource "aws_db_subnet_group" "rds" {
 
 resource "aws_db_instance" "rds" {
   identifier_prefix = "${local.nextcloud_namespaced_hostname}-db-"
-  engine            = "mariadb"
-  engine_version    = "10.3"
+  engine            = data.aws_rds_engine_version.default.engine
+  engine_version    = data.aws_rds_engine_version.default.version
   instance_class    = "db.t3.micro"
   multi_az          = var.rds_multi_az
   name              = "nextcloud"
@@ -40,6 +40,10 @@ resource "aws_db_instance" "rds" {
 
 resource "random_pet" "nextcloud_rds_db_username" {
   separator = ""
+}
+
+data "aws_rds_engine_version" "default" {
+  engine = var.rds_engine_type
 }
 
 # resource aws_db_parameter_group nextcloud {

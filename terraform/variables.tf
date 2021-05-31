@@ -33,6 +33,12 @@ variable "r53_domain_name" {
   default     = ""
 }
 
+variable "rds_engine_type" {
+  type        = string
+  description = "Valid RDS engine type value acceptable by the AWS RDS API."
+  default     = "mariadb"
+}
+
 variable "rds_multi_az" {
   type        = bool
   description = "Whether the RDS instance should span multiple availability zones; may impact cost"
