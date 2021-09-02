@@ -30,11 +30,11 @@ resource "aws_ssm_parameter" "nextcloud_db_passwd" {
   overwrite = true
 }
 
-resource "random_password" "nextcloud_rds_db" {
-  length           = 30
-  number           = true
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+resource "tls_private_key" "nextcloud" {
+  count = local.custom_ssh_key_material_provided ? 0 : 1
+
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "aws_ssm_parameter" "nextcloud_ssh_priv_key" {

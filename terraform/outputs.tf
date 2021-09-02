@@ -3,7 +3,7 @@ output "kms_key_alias_name" {
 }
 
 output "management_ip" {
-  value = split("/", local.mgmt_ip)[0]
+  value = split("/", local.mgmt_ip_cidr)[0]
 }
 
 output "pet_name" {

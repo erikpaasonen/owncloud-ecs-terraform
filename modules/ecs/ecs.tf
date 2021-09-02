@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "nextcloud" {
-  name = local.nextcloud_namespaced_hostname
+  name = var.namespaced_hostname
 }
 
 resource "aws_ecs_service" "nextcloud" {
@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "nextcloud" {
     "environment": [
       {
         "name": "nextcloud_DOMAIN",
-        "value": "${local.nextcloud_namespaced_hostname}.${var.r53_domain_name}"
+        "value": "${var.namespaced_hostname}.${var.r53_domain_name}"
       },
       {
         "name": "nextcloud_DB_HOST",
@@ -90,7 +90,7 @@ resource "aws_ecs_task_definition" "nextcloud" {
       },
       {
         "name": "nextcloud_REDIS_HOST",
-        "value": local.nextcloud_namespaced_redis_hostname
+        "value": local.namespaced_redis_hostname
       }
     ],
     "mountPoints": [

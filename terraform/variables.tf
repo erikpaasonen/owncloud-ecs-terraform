@@ -1,15 +1,13 @@
 locals {
   custom_domain_used                  = tobool(length(var.r53_domain_name) > 0)
   custom_ssh_key_material_provided    = tobool(length(var.ssh_public_key_material) > 0)
-  mgmt_ip                             = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
+  mgmt_ip_cidr                        = length(var.mgmt_ip_addr) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip_addr}/32"
   nextcloud_namespaced_hostname       = "nextcloud-${random_pet.this.id}"
-  nextcloud_namespaced_db_hostname    = "${local.nextcloud_namespaced_hostname}-db"
-  nextcloud_namespaced_redis_hostname = "${local.nextcloud_namespaced_hostname}-redis"
   private_key_material                = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].private_key_pem : file("~/.ssh/id_rsa")
   public_key_material                 = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_openssh : var.ssh_public_key_material
 }
 
-variable "mgmt_ip" {
+variable "mgmt_ip_addr" {
   type        = string
   description = "IP address from which the nextcloud instance will be managed"
   default     = ""

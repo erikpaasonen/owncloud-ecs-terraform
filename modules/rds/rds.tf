@@ -1,11 +1,11 @@
 resource "aws_db_subnet_group" "rds" {
-  name        = "${local.nextcloud_namespaced_hostname}-rds-subnet-group"
+  name        = var.namespaced_hostname
   description = "RDS subnet group for the RDS database used by nextcloud"
   subnet_ids  = module.vpc.private_subnets
 }
 
 resource "aws_db_instance" "rds" {
-  identifier_prefix = "${local.nextcloud_namespaced_hostname}-db-"
+  identifier_prefix = "${var.namespaced_hostname}-db-"
   engine            = data.aws_rds_engine_version.default.engine
   engine_version    = data.aws_rds_engine_version.default.version
   instance_class    = "db.t3.micro"
@@ -20,8 +20,8 @@ resource "aws_db_instance" "rds" {
 
   kms_key_id        = aws_kms_key.nextcloud.arn
   storage_encrypted = true
-  username          = random_pet.nextcloud_rds_db_username.id
-  password          = random_password.nextcloud_rds_db.result
+  username          = random_pet.rds_db_username.id
+  password          = random_password.rds_db.result
 
   enabled_cloudwatch_logs_exports = [
     "audit",
@@ -35,19 +35,11 @@ resource "aws_db_instance" "rds" {
   ]
 
   skip_final_snapshot       = true
-  final_snapshot_identifier = "rds-${local.nextcloud_namespaced_hostname}-snapshot"
-}
-
-resource "random_pet" "nextcloud_rds_db_username" {
-  separator = ""
-}
-
-data "aws_rds_engine_version" "default" {
-  engine = var.rds_engine_type
+  final_snapshot_identifier = "rds-${var.namespaced_hostname}-snapshot"
 }
 
 # resource aws_db_parameter_group nextcloud {
-#   name_prefix = "${local.nextcloud_namespaced_hostname}-db-"
+#   name_prefix = "${var.namespaced_hostname}-db-"
 #   family      = "mariadb"
 
 #   # parameter {
@@ -62,7 +54,7 @@ data "aws_rds_engine_version" "default" {
 # }
 
 # resource aws_db_option_group nextcloud {
-#   name_prefix              = "${local.nextcloud_namespaced_hostname}-db-"
+#   name_prefix              = "${var.namespaced_hostname}-db-"
 #   option_group_description = "culled from nextcloud Enterprise Docker Compose file" // https://doc.nextcloud.org/server/10.3/admin_manual/installation/docker/
 #   engine_name              = "mariadb"
 #   major_engine_version     = "10.3"

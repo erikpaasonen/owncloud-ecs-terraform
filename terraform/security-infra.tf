@@ -10,13 +10,6 @@ resource "aws_key_pair" "deployer" {
   public_key = local.public_key_material
 }
 
-resource "tls_private_key" "nextcloud" {
-  count = local.custom_ssh_key_material_provided ? 0 : 1
-
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
 resource "aws_kms_key" "nextcloud" {
 }
 
