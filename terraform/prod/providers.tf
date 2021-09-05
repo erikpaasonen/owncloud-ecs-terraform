@@ -1,17 +1,24 @@
 provider "aws" {
   region = "us-west-2"
 
-  default_tags {
-    tags = {
-    managed_by_terraform = true
-    }
-  }
+  # default_tags {
+  #   tags = {
+  #     managed_by_terraform = true
+  #   }
+  # }
 }
 
-provider "http" {}
+provider "http" {
+}
 
-provider "null" {}
+provider "local" {
+}
 
-provider "random" {}
+provider "null" {
+}
 
-provider "tls" {}
+provider "random" {
+}
+
+provider "tls" {
+}

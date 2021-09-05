@@ -3,16 +3,16 @@ resource "aws_ecs_cluster" "nextcloud" {
 }
 
 resource "aws_ecs_service" "nextcloud" {
-  name = "nextcloud-service-${random_pet.this.id}"
-  cluster = aws_ecs_cluster.nextcloud.id
+  name            = "nextcloud-service-${random_pet.this.id}"
+  cluster         = aws_ecs_cluster.nextcloud.id
   task_definition = aws_ecs_task_definition.nextcloud.arn
-  launch_type = "FARGATE"
-  desired_count = 1
-  
+  launch_type     = "FARGATE"
+  desired_count   = 1
+
   network_configuration {
     subnets = module.vpc.private_subnets
     security_groups = [
-      aws_security_group.nextcloud_service.id,      
+      aws_security_group.nextcloud_service.id,
     ]
   }
 }
@@ -46,104 +46,104 @@ resource "aws_ecs_task_definition" "nextcloud" {
   }
 
   container_definitions = jsonencode([
-  {
-    "name": "main-service",
-    "image": "nextcloud/server:${var.nextcloud_version}",
-    "cpu": 128,
-    "memory": 256,
-    "portMappings": [
-      {
-        "containerPort": 8080,
-        "hostPort": 8080,
-        "protocol": "tcp"
-      }
-    ],
-    "essential": true,
-    "environment": [
-      {
-        "name": "nextcloud_DOMAIN",
-        "value": "${var.namespaced_hostname}.${var.r53_domain_name}"
-      },
-      {
-        "name": "nextcloud_DB_HOST",
-        "value": aws_db_instance.rds.address
-      },
-      {
-        "name": "nextcloud_DB_TYPE",
-        "value": var.rds_engine_type
-      },
-      {
-        "name": "nextcloud_DB_NAME",
-        "value": aws_db_instance.rds.name
-      },
-      {
-        "name": "nextcloud_DB_USERNAME",
-        "value": aws_db_instance.rds.username
-      },
-      {
-        "name": "nextcloud_ENABLE_CERTIFICATE_MANAGEMENT",
-        "value": "true"
-      },
-      {
-        "name": "nextcloud_REDIS_ENABLED",
-        "value": "true"
-      },
-      {
-        "name": "nextcloud_REDIS_HOST",
-        "value": local.namespaced_redis_hostname
-      }
-    ],
-    "mountPoints": [
-      {
-        "sourceVolume": "files",
-        "containerPath": "/mnt/data"
-      }
-    ],
-    "secrets": [
-      {
-        "name": "nextcloud_ADMIN_PASSWORD",
-        "valueFrom": aws_ssm_parameter.nextcloud_admin_passwd.arn
-      }
-    ],
-    "privileged": false,
-    "readonlyRootFilesystem": true,
-    "healthCheck": {
-      "command": [
-        "/usr/bin/healthcheck"
+    {
+      "name" : "main-service",
+      "image" : "nextcloud/server:${var.nextcloud_version}",
+      "cpu" : 128,
+      "memory" : 256,
+      "portMappings" : [
+        {
+          "containerPort" : 8080,
+          "hostPort" : 8080,
+          "protocol" : "tcp"
+        }
       ],
-      "interval": 30,
-      "timeout": 10,
-      "retries": 5
-    }
-  },
-  {
-    "name": "redis",
-    "image": "webhippie/redis:latest",
-    "cpu": 128,
-    "memory": 256,
-    "essential": true,
-    "environment": [
-      {
-        "name": "REDIS_DATABASES",
-        "value": "1"
-      }
-    ],
-    "mountPoints": [
-      {
-        "sourceVolume": "redis",
-        "containerPath": "/var/lib/redis"
-      }
-    ],
-    "privileged": false,
-    "readonlyRootFilesystem": true,
-    "healthCheck": {
-      "command": [
-        "/usr/bin/healthcheck"
+      "essential" : true,
+      "environment" : [
+        {
+          "name" : "nextcloud_DOMAIN",
+          "value" : "${var.namespaced_hostname}.${var.r53_domain_name}"
+        },
+        {
+          "name" : "nextcloud_DB_HOST",
+          "value" : aws_db_instance.rds.address
+        },
+        {
+          "name" : "nextcloud_DB_TYPE",
+          "value" : var.rds_engine_type
+        },
+        {
+          "name" : "nextcloud_DB_NAME",
+          "value" : aws_db_instance.rds.name
+        },
+        {
+          "name" : "nextcloud_DB_USERNAME",
+          "value" : aws_db_instance.rds.username
+        },
+        {
+          "name" : "nextcloud_ENABLE_CERTIFICATE_MANAGEMENT",
+          "value" : "true"
+        },
+        {
+          "name" : "nextcloud_REDIS_ENABLED",
+          "value" : "true"
+        },
+        {
+          "name" : "nextcloud_REDIS_HOST",
+          "value" : local.namespaced_redis_hostname
+        }
       ],
-      "interval": 30,
-      "timeout": 10,
-      "retries": 5
+      "mountPoints" : [
+        {
+          "sourceVolume" : "files",
+          "containerPath" : "/mnt/data"
+        }
+      ],
+      "secrets" : [
+        {
+          "name" : "nextcloud_ADMIN_PASSWORD",
+          "valueFrom" : aws_ssm_parameter.nextcloud_admin_passwd.arn
+        }
+      ],
+      "privileged" : false,
+      "readonlyRootFilesystem" : true,
+      "healthCheck" : {
+        "command" : [
+          "/usr/bin/healthcheck"
+        ],
+        "interval" : 30,
+        "timeout" : 10,
+        "retries" : 5
+      }
+    },
+    {
+      "name" : "redis",
+      "image" : "webhippie/redis:latest",
+      "cpu" : 128,
+      "memory" : 256,
+      "essential" : true,
+      "environment" : [
+        {
+          "name" : "REDIS_DATABASES",
+          "value" : "1"
+        }
+      ],
+      "mountPoints" : [
+        {
+          "sourceVolume" : "redis",
+          "containerPath" : "/var/lib/redis"
+        }
+      ],
+      "privileged" : false,
+      "readonlyRootFilesystem" : true,
+      "healthCheck" : {
+        "command" : [
+          "/usr/bin/healthcheck"
+        ],
+        "interval" : 30,
+        "timeout" : 10,
+        "retries" : 5
+      }
     }
-  }
   ])
 }

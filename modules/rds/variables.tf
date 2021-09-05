@@ -1,5 +1,5 @@
 variable "namespaced_hostname" {
-  type = string
+  type        = string
   description = "hostname base name including random pet name, for naming related resources"
 }
 

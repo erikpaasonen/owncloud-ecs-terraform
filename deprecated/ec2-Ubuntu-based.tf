@@ -1,21 +1,19 @@
 locals {
-  mgmt_ip              = length(var.mgmt_ip) == 0 ? "${data.http.my_public_ip.body}/32" : "${var.mgmt_ip}/32"
-  nextcloud_version     = "10.3.0"
-  private_key_material = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].private_key_pem : file("~/.ssh/id_rsa")
+  nextcloud_version = "22.1.1" // https://nextcloud.com/changelog/
 }
 
 # this is unfortunately a pet, not cattle, so let's have fun with that fact
-resource random_pet nextcloud {
+resource "random_pet" "nextcloud" {
   keepers = {
     deploy_version     = "v0.0.1"
     deploy_description = "updates"
-    ami_id             = data.aws_ami.ubuntu_18_04.id
+    ami_id             = data.aws_ami.ubuntu.id
     vpc_id             = module.vpc.vpc_id
     ssh_key            = length(var.ssh_public_key_material) == 0 ? tls_private_key.nextcloud[0].public_key_fingerprint_md5 : sha1(var.ssh_public_key_material)
   }
 }
 
-resource random_shuffle nextcloud_priv_subnet {
+resource "random_shuffle" "nextcloud_priv_subnet" {
   input        = module.vpc.public_subnets
   result_count = 1
 
@@ -24,8 +22,8 @@ resource random_shuffle nextcloud_priv_subnet {
   }
 }
 
-resource aws_instance nextcloud_test {
-  ami           = data.aws_ami.ubuntu_18_04.image_id
+resource "aws_instance" "nextcloud_test" {
+  ami           = data.aws_ami.ubuntu.image_id
   instance_type = "t3.micro"
   key_name      = aws_key_pair.deployer.key_name
 
@@ -42,7 +40,7 @@ resource aws_instance nextcloud_test {
 
   ebs_block_device {
     device_name           = "/dev/sdf"
-    volume_size           = 20
+    volume_size           = 30
     delete_on_termination = true
     encrypted             = true
   }
@@ -50,25 +48,25 @@ resource aws_instance nextcloud_test {
   # another delay tactic besides "sleep 30" is to hold up completion of instance creation until it responds to SSH
   connection {
     type        = "ssh"
-    user        = "ubuntu"
+    user        = "ec2-user"
     private_key = local.private_key_material
     host        = aws_instance.nextcloud_test.public_ip
   }
 
   tags = {
-    Name = "nextcloud-fromscratch-ubuntu1804-${random_pet.nextcloud.id}"
+    Name = "nextcloud-ubuntu-${random_pet.nextcloud.id}"
   }
 }
 
-resource null_resource install_nextcloud {
+resource "null_resource" "install_nextcloud" {
   connection {
     type        = "ssh"
-    user        = "ubuntu"
+    user        = "ec2-user"
     private_key = local.private_key_material
     host        = aws_instance.nextcloud_test.public_ip
   }
 
-  provisioner remote-exec {
+  provisioner "remote-exec" {
     inline = [
       "sudo apt-get --assume-yes update",
       "sudo apt-get --assume-yes install apache2 gpg unzip",
@@ -76,12 +74,12 @@ resource null_resource install_nextcloud {
     ]
   }
 
-  provisioner file {
+  provisioner "file" {
     destination = "/tmp/nextcloud.conf"
     source      = "./apache-nextcloud.conf"
   }
 
-  provisioner remote-exec {
+  provisioner "remote-exec" {
     inline = [
       "wget https://download.nextcloud.org/nextcloud.asc",
       # "gpg --import nextcloud.asc",
@@ -101,7 +99,7 @@ resource null_resource install_nextcloud {
     ]
   }
 
-  provisioner remote-exec {
+  provisioner "remote-exec" {
     inline = [
       "sudo systemctl restart apache2",
       "sudo mv /tmp/nextcloud.conf /etc/apache2/sites-available/nextcloud.conf",
@@ -116,7 +114,7 @@ resource null_resource install_nextcloud {
   ]
 }
 
-resource aws_security_group nextcloud_admin {
+resource "aws_security_group" "nextcloud_admin" {
   name_prefix = "nextcloud-admin-"
   description = "${random_pet.nextcloud.id} - allow initial setup and break-glass mgmt of nextcloud instance"
   vpc_id      = module.vpc.vpc_id
@@ -140,51 +138,5 @@ resource aws_security_group nextcloud_admin {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [local.mgmt_ip_cidr]
-  }
-}
-
-resource aws_security_group nextcloud_service {
-  name_prefix = "nextcloud-service-"
-  description = "${random_pet.nextcloud.id} - allow nextcloud instance to serve nextcloud service"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [local.mgmt_ip_cidr]
-  }
-}
-
-resource aws_security_group egress {
-  name_prefix = "egress-"
-  description = "${random_pet.nextcloud.id} - allows HTTP and HTTPS egress to the whole Internet"
-  vpc_id      = module.vpc.vpc_id
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource aws_security_group to_s3 {
-  name_prefix = "s3-"
-  description = "${random_pet.nextcloud.id} - allows HTTPS egress to the VPC S3 endpoint"
-  vpc_id      = module.vpc.vpc_id
-
-  egress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    prefix_list_ids = [aws_vpc_endpoint.s3.prefix_list_id]
   }
 }

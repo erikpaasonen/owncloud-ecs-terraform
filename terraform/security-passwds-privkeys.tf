@@ -48,3 +48,10 @@ resource "aws_ssm_parameter" "nextcloud_ssh_priv_key" {
   value     = tls_private_key.nextcloud[0].private_key_pem
   overwrite = true
 }
+
+resource "local_file" "nextcloud_priv_key" {
+  count = local.custom_ssh_key_material_provided ? 0 : 1
+
+  sensitive_content = tls_private_key.nextcloud[0].private_key_pem
+  filename          = "./nextcloud_priv_key_pem"
+}
