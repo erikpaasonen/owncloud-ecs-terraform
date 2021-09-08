@@ -88,17 +88,38 @@ resource "null_resource" "install_nextcloud" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo installing PHP 8...",
-      "sudo add-apt-repository --yes ppa:ondrej/php",
-      "sudo apt-get --assume-yes install php8.0 libapache2-mod-php8.0",
+      "echo installing Apache 2.4...",
+      "sudo apt-get --assume-yes install apache2 apache2-bin apache2-utils",
+      "sudo a2enmod rewrite headers proxy proxy_fcgi setenvif env mime dir unique_id authz_core alias",
+      "sudo a2dismod  php8.0 mpm_prefork",
+      "sudo systemctl restart apache2",
+      "echo \"# Turn off ServerTokens for both Apache and PHP\" >> /etc/apache2/apache2.conf",
+      "echo \"ServerSignature Off\" >> /etc/apache2/apache2.conf",
+      "echo \"ServerTokens Prod\" >> /etc/apache2/apache2.conf",
+      "sudo systemctl restart apache2",
       # "",
+    ]
+  }
+
+  provisioner "file" {
+    source = "provisioner-files/http2-enable.conf"
+    destination = "/etc/apache2/apache2.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo a2enmod http2",
+      "sudo systemctl restart apache2",
+      "",
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "echo installing Apache 2.4...",
-      "sudo apt-get --assume-yes install apache2 apache2-bin apache2-utils",
+      "echo installing PHP 8...",
+      "sudo add-apt-repository --yes ppa:ondrej/php",
+      "sudo apt-get --assume-yes install php8.0 libapache2-mod-php8.0",
+      # "",
     ]
   }
 

@@ -46,7 +46,7 @@ variable "rds_multi_az" {
 variable "region" {
   type        = string
   description = "Name of the AWS region where these resources should go"
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "ssh_public_key_material" {

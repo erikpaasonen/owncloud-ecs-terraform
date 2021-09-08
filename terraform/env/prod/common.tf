@@ -1,4 +1,4 @@
 module "common" {
-  source = "../"
+  source = "../../"
 
 }
