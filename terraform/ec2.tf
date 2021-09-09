@@ -47,7 +47,7 @@ resource "aws_instance" "nextcloud" {
   ]
 
   root_block_device {
-    volume_size = 80
+    volume_size           = 80
     delete_on_termination = true
   }
 
