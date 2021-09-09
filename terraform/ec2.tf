@@ -32,7 +32,7 @@ resource "aws_key_pair" "deployer" {
 # anyway... this is as far as Terraform _should_ go
 resource "aws_instance" "nextcloud" {
   ami           = data.aws_ami.selected.image_id
-  instance_type = "t3.micro"
+  instance_type = "t3a.small"
   key_name      = aws_key_pair.deployer.key_name
 
   associate_public_ip_address = true
@@ -46,11 +46,9 @@ resource "aws_instance" "nextcloud" {
     aws_security_group.to_s3.id,
   ]
 
-  ebs_block_device {
-    device_name           = "/dev/sdf"
-    volume_size           = 40
+  root_block_device {
+    volume_size = 80
     delete_on_termination = true
-    encrypted             = true
   }
 
   user_data = <<USERDATA
