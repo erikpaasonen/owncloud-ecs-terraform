@@ -14,7 +14,7 @@ locals {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  # # AWS services endpoints
+  # # AWS services endpoints - we'll attach these ourselves, thank you
   # enable_s3_endpoint            = true
   # enable_dynamodb_endpoint      = true
   # enable_ssm_endpoint           = true
