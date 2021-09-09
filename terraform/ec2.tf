@@ -25,6 +25,11 @@ resource "aws_key_pair" "deployer" {
   public_key = local.public_key_material
 }
 
+# the intent is to use this script:
+# https://github.com/nextcloud/vm/blob/master/nextcloud_install_production.sh
+# must be run interactively as it asks a bunch of questions
+# Terraform wouldn't be good at detecting drift from the scripted actions
+# anyway... this is as far as Terraform _should_ go
 resource "aws_instance" "nextcloud" {
   ami           = data.aws_ami.selected.image_id
   instance_type = "t3.micro"
