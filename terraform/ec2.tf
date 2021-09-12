@@ -2,24 +2,7 @@ locals {
   nextcloud_version = "22.1.1" // https://nextcloud.com/changelog/
 }
 
-# this is unfortunately a pet, not cattle, so let's have fun with that fact
-resource "random_pet" "nextcloud" {
-  keepers = {
-    ami_id       = data.aws_ami.selected.id
-    vpc_id       = module.vpc.vpc_id
-    ssh_key_hash = local.custom_ssh_key_material_provided ? sha1(var.ssh_public_key_material) : tls_private_key.nextcloud[0].public_key_fingerprint_md5
-  }
-}
-
-resource "random_shuffle" "nextcloud_priv_subnet" {
-  input        = module.vpc.public_subnets
-  result_count = 1
-
-  keepers = {
-    random_pet = random_pet.nextcloud.id,
-  }
-}
-
+# represent the given public key material as an AWS-native resource
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-${random_pet.this.id}"
   public_key = local.public_key_material
@@ -49,6 +32,15 @@ resource "aws_instance" "nextcloud" {
   root_block_device {
     volume_size           = 80
     delete_on_termination = true
+  }
+
+  # don't let Terraform mark this aws_instance as done creating
+  # until it actually responds to SSH
+  connection {
+    type        = "ssh"
+    host        = self.public_ip
+    user        = "ubuntu"
+    private_key = local.private_key_material
   }
 
   user_data = <<USERDATA
