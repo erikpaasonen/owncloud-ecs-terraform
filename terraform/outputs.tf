@@ -11,7 +11,7 @@ output "instance_public_ip" {
 }
 
 output "pet_name" {
-  value = random_pet.this.id
+  value = random_pet.nextcloud.id
 }
 
 output "vpc_azs" {

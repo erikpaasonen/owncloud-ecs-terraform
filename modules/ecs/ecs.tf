@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "nextcloud" {
 }
 
 resource "aws_ecs_service" "nextcloud" {
-  name            = "nextcloud-service-${random_pet.this.id}"
+  name            = "nextcloud-service-${random_pet.nextcloud.id}"
   cluster         = aws_ecs_cluster.nextcloud.id
   task_definition = aws_ecs_task_definition.nextcloud.arn
   launch_type     = "FARGATE"
@@ -18,7 +18,7 @@ resource "aws_ecs_service" "nextcloud" {
 }
 
 resource "aws_ecs_task_definition" "nextcloud" {
-  family       = "nextcloud-service-${random_pet.this.id}"
+  family       = "nextcloud-service-${random_pet.nextcloud.id}"
   network_mode = "awsvpc"
 
   execution_role_arn = aws_iam_role.nextcloud_ecs_exec.arn

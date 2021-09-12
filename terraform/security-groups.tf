@@ -1,6 +1,6 @@
 resource "aws_security_group" "publish_443_to_internet" {
   name_prefix = "nextcloud-service-"
-  description = "${random_pet.this.id} - allow nextcloud instance to serve nextcloud service; restricted to management IP for testing"
+  description = "${random_pet.nextcloud.id} - allow nextcloud instance to serve nextcloud service; restricted to management IP for testing"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -15,7 +15,7 @@ resource "aws_security_group" "publish_443_to_internet" {
 
 resource "aws_security_group" "egress" {
   name_prefix = "egress-"
-  description = "${random_pet.this.id} - allows HTTP and HTTPS egress to the whole Internet"
+  description = "${random_pet.nextcloud.id} - allows HTTP and HTTPS egress to the whole Internet"
   vpc_id      = module.vpc.vpc_id
 
   egress {
@@ -42,7 +42,7 @@ resource "aws_security_group" "egress" {
 
 resource "aws_security_group" "to_s3" {
   name_prefix = "s3-"
-  description = "${random_pet.this.id} - allows HTTPS egress to the VPC S3 endpoint"
+  description = "${random_pet.nextcloud.id} - allows HTTPS egress to the VPC S3 endpoint"
   vpc_id      = module.vpc.vpc_id
 
   egress {

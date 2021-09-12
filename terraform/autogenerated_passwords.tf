@@ -1,5 +1,5 @@
 locals {
-  paramstore_creds_path = "/creds/nextcloud/${random_pet.this.id}"
+  paramstore_creds_path = "/creds/nextcloud/${random_pet.nextcloud.id}"
 }
 
 resource "random_password" "nextcloud_admin" {
