@@ -1,4 +1,3 @@
-
 data "aws_ami" "selected" {
   owners      = ["099720109477"] # Canonical
   most_recent = true

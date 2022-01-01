@@ -1,10 +1,10 @@
 locals {
-  nextcloud_version = "22.1.1" // https://nextcloud.com/changelog/
+  nextcloud_version = "23.0.0" // https://nextcloud.com/changelog/
 }
 
 # represent the given public key material as an AWS-native resource
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key-${random_pet.this.id}"
+  key_name   = "deployer-key-${random_pet.nextcloud.id}"
   public_key = local.public_key_material
 }
 
