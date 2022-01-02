@@ -1,0 +1,15 @@
+resource "aws_route53_record" "http" {
+  zone_id = data.aws_route53_zone.selected.zone_id
+  name    = "nextcloud"
+  type    = "A"
+
+  alias {
+    name                   = local.nextcloud_namespaced_hostname
+    zone_id                = module.rds.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
+data "aws_route53_zone" "selected" {
+  name = "isotop.es."
+}

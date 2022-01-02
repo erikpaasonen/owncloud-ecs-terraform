@@ -1,4 +1,4 @@
-resource "random_pet" "rds_db_username" {
+resource "random_pet" "db_username" {
   separator = ""
 }
 

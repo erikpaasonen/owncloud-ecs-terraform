@@ -1,5 +1,5 @@
 module "rds" {
-  source = "../modules/rds"
+  source = "./modules/rds"
 
   namespaced_hostname = local.nextcloud_namespaced_hostname
   rds_engine_type     = var.rds_engine_type
