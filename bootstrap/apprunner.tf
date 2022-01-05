@@ -1,19 +1,19 @@
-# resource "aws_apprunner_service" "nextcloud" {
-#   service_name = local.nextcloud_namespaced_hostname
+resource "aws_apprunner_service" "nextcloud" {
+  service_name = local.nextcloud_namespaced_hostname
 
-#   source_configuration {
-#     authentication_configuration {
-#       access_role_arn = aws_iam_role.apprunner.arn
-#     }
-#     image_repository {
-#       image_configuration {
-#         port = "80"
-#       }
-#       image_identifier      = "${aws_ecr_repository.nextcloud.repository_url}:latest"
-#       image_repository_type = "ECR"
-#     }
-#   }
-# }
+  source_configuration {
+    authentication_configuration {
+      access_role_arn = aws_iam_role.apprunner.arn
+    }
+    image_repository {
+      image_configuration {
+        port = "80"
+      }
+      image_identifier      = "${aws_ecr_repository.nextcloud.repository_url}:latest"
+      image_repository_type = "ECR"
+    }
+  }
+}
 
 resource "aws_iam_role" "apprunner" {
   name_prefix        = "${local.nextcloud_namespaced_hostname}-apprunner-"
@@ -37,10 +37,10 @@ data "aws_iam_policy_document" "apprunner" {
       "ecr:BatchGetImage",
       "ecr:DescribeImages",
       "ecr:GetDownloadUrlForLayer",
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
     ]
-    resources = [
-      aws_ecr_repository.nextcloud.arn,
-    ]
+    resources = ["*"]
   }
 }
 
