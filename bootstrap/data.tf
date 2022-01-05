@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "trust_policy_apprunner" {
     sid = "AllowCodeBuildSvcToAssumeRole"
     principals {
       type        = "Service"
-      identifiers = ["apprunner.amazonaws.com"]
+      identifiers = ["build.apprunner.amazonaws.com"]
     }
     actions = ["sts:AssumeRole"]
   }

@@ -25,6 +25,18 @@ data "aws_iam_policy_document" "cicd" {
   }
 
   statement {
+    sid = "AllowRetrieveSecretsValuesFromParamStore"
+    actions = [
+      "ssm:GetParameters",
+    ]
+    resources = [
+      "arn:aws:ssm:us-east-2:${data.aws_caller_identity.current.account_id}:parameter${var.parampath_mysql_passwd}",
+      "arn:aws:ssm:us-east-2:${data.aws_caller_identity.current.account_id}:parameter${var.parampath_nc_admin_passwd}",
+      "arn:aws:ssm:us-east-2:${data.aws_caller_identity.current.account_id}:parameter${var.parampath_obj_store_s3_secret}",
+    ]
+  }
+
+  statement {
     sid = "AllowPushDockerImgToECR"
     actions = [
       "ecr:BatchCheckLayerAvailability",

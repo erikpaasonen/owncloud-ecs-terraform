@@ -6,20 +6,11 @@ resource "aws_codebuild_project" "build_push_to_ecr" {
 
   service_role = aws_iam_role.nc_cicd.arn
 
-  artifacts {
-    type = "NO_ARTIFACTS"
-  }
-
-  cache {
-    type  = "LOCAL"
-    modes = ["LOCAL_DOCKER_LAYER_CACHE"]
-  }
-
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
     image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
-    privileged_mode = true
+    privileged_mode = true // necessary to build Docker images
 
     environment_variable {
       name  = "IMAGE_REPO_NAME"
@@ -30,11 +21,33 @@ resource "aws_codebuild_project" "build_push_to_ecr" {
       name  = "IMAGE_TAG"
       value = "latest"
     }
-  }
 
-  logs_config {
-    cloudwatch_logs {
-      group_name = aws_cloudwatch_log_group.codebuild.name
+    environment_variable {
+      name  = "REGION"
+      value = data.aws_region.current.name
+    }
+
+    environment_variable {
+      name  = "ECR_URL"
+      value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com"
+    }
+
+    environment_variable {
+      name  = "MYSQL_PASS_FROM_PARAMSTORE"
+      type  = "PARAMETER_STORE"
+      value = var.parampath_mysql_passwd
+    }
+
+    environment_variable {
+      name  = "NEXTCLOUD_ADMIN_PASS_FROM_PARAMSTORE"
+      type  = "PARAMETER_STORE"
+      value = var.parampath_nc_admin_passwd
+    }
+
+    environment_variable {
+      name  = "OBJSTORE_SECRET_FROM_PARAMSTORE"
+      type  = "PARAMETER_STORE"
+      value = var.parampath_obj_store_s3_secret
     }
   }
 
@@ -46,22 +59,41 @@ resource "aws_codebuild_project" "build_push_to_ecr" {
       phases = {
         pre_build = {
           commands = [
-            "aws ecr get-login-password --region ${data.aws_region.current.name} | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com"
+            "aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_URL",
+            "echo $CODEBUILD_BUILD_ID",
+            "export CB_EXEC_ID=$(echo $CODEBUILD_BUILD_ID | cut -d ':' -f2)",
+            "echo $CB_EXEC_ID",
           ]
         }
         build = {
           commands = [
             "docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .",
-            "docker tag $IMAGE_REPO_NAME:$IMAGE_TAG ${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-            "",
+            "docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ECR_URL/$IMAGE_REPO_NAME:$CB_EXEC_ID",
+            "docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ECR_URL/$IMAGE_REPO_NAME:$IMAGE_TAG",
           ]
         }
         post_build = {
           commands = [
-            "docker push ${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+            "docker push $ECR_URL/$IMAGE_REPO_NAME:$IMAGE_TAG",
+            "docker push $ECR_URL/$IMAGE_REPO_NAME:$CB_EXEC_ID",
           ]
         }
       }
     })
+  }
+
+  artifacts {
+    type = "NO_ARTIFACTS"
+  }
+
+  cache {
+    type  = "LOCAL"
+    modes = ["LOCAL_DOCKER_LAYER_CACHE"]
+  }
+
+  logs_config {
+    cloudwatch_logs {
+      group_name = aws_cloudwatch_log_group.codebuild.name
+    }
   }
 }
