@@ -1,5 +1,5 @@
 resource "aws_apprunner_service" "nextcloud" {
-  service_name = local.nextcloud_namespaced_hostname
+  service_name = "nextcloud"
 
   source_configuration {
     authentication_configuration {
@@ -9,14 +9,14 @@ resource "aws_apprunner_service" "nextcloud" {
       image_configuration {
         port = "80"
       }
-      image_identifier      = "${aws_ecr_repository.nextcloud.repository_url}:latest"
+      image_identifier      = "${data.aws_ecr_repository.nextcloud.repository_url}:latest"
       image_repository_type = "ECR"
     }
   }
 }
 
 resource "aws_iam_role" "apprunner" {
-  name_prefix        = "${local.nextcloud_namespaced_hostname}-apprunner-"
+  name_prefix        = "nextcloud-apprunner-"
   assume_role_policy = data.aws_iam_policy_document.trust_policy_apprunner.json
 }
 
